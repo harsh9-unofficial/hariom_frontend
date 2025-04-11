@@ -48,7 +48,7 @@ const WishlistPage = () => {
               className="border-b border-gray-300 py-4 md:py-6 flex flex-col md:grid md:grid-cols-7 gap-4 items-center"
             >
               {/* Mobile layout */}
-              <div className="w-full flex md:hidden items-center justify-between gap-4">
+              <div className="w-full flex md:hidden items-center justify-between gap-6">
                 <img
                   src={item.image}
                   alt={item.name}

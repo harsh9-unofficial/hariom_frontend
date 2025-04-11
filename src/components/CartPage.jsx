@@ -25,17 +25,9 @@ const initialCartItems = [
 function EmptyCart() {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 gap-5 xl:gap-8 2xl:gap-5">
-      {/* <img
-        src="/images/empty-cart.png"
-        alt="Empty Cart"
-        className="max-w-[300px] w-full mb-8"
-      /> */}
       <h2 className="text-xl font-semibold mb-2">
         Your Cart is Currently Empty.
       </h2>
-      {/* <p className="text-gray-500 mb-6">
-        Login to see the items you added previously
-      </p> */}
       <Link to="/products">
         <button className="bg-[#558AFF] text-white px-6 py-2 rounded cursor-pointer transition">
           Continue Shopping
@@ -81,11 +73,9 @@ export default function CartPage() {
 
   return (
     <div className="px-2 py-12 container mx-auto">
-      {/* Header */}
       <h2 className="text-3xl md:text-4xl font-semibold mb-2">Cart Page</h2>
       <p className="text-lg md:text-xl text-gray-500 mb-8">Home / Cart Page</p>
 
-      {/* Cart Content */}
       {cartItems.length === 0 ? (
         <EmptyCart />
       ) : (
@@ -104,75 +94,109 @@ export default function CartPage() {
 
             {/* Cart Items */}
             {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="border-b border-gray-300 py-4 grid grid-cols-2 md:grid-cols-7 lg:gap-4 items-center text-center md:text-left"
-              >
-                {/* Product Image */}
-                <div className="flex justify-center md:justify-start">
+              <div key={item.id} className="border-b border-gray-300 py-4">
+                {/* Mobile layout */}
+                <div className="w-full flex md:hidden items-start gap-4">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="h-28 w-28 object-cover rounded"
+                    className="w-30 h-30 object-cover rounded"
                   />
-                </div>
-
-                {/* Description */}
-                <div className="md:col-span-2 md:pl-3 lg:pl-0">
-                  <p className="font-medium text-lg">{item.name}</p>
-                  <p className="text-gray-500 text-sm">Size: {item.size}</p>
-                </div>
-
-                {/* Quantity */}
-                <div className="flex justify-center md:justify-start lg:justify-center items-center">
-                  <div className="flex items-center border border-gray-300 rounded overflow-hidden">
-                    <button
-                      onClick={() => decrementQuantity(item.id)}
-                      className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="text"
-                      readOnly
-                      value={item.quantity}
-                      className="w-10 lg:w-9 xl:w-10 text-center text-base"
-                    />
-                    <button
-                      onClick={() => incrementQuantity(item.id)}
-                      className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
-                    >
-                      +
-                    </button>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-base font-semibold">{item.name}</p>
+                    <p className="text-sm text-gray-500">Size: {item.size}</p>
+                    <p className="text-sm text-gray-800 mt-1">
+                      ₹{(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <div className="flex items-center gap-8 mt-2">
+                      <div className="flex items-center border border-gray-300 rounded overflow-hidden">
+                        <button
+                          onClick={() => decrementQuantity(item.id)}
+                          className="px-3 py-2 text-gray-600 text-sm"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="text"
+                          readOnly
+                          value={item.quantity}
+                          className="w-8 text-center text-sm"
+                        />
+                        <button
+                          onClick={() => incrementQuantity(item.id)}
+                          className="px-3 py-2 text-gray-600 text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <Trash2
+                        size={18}
+                        className="text-gray-600 hover:text-red-500 cursor-pointer"
+                        onClick={() => removeItem(item.id)}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Price */}
-                <div className="text-gray-800 text-base text-center">
-                  ₹{item.price.toFixed(2)}
-                </div>
-
-                {/* Total */}
-                <div className="text-gray-800 text-base text-center">
-                  ₹{(item.price * item.quantity).toFixed(2)}
-                </div>
-
-                {/* Delete */}
-                <div className="flex justify-center">
-                  <Trash2
-                    className="text-gray-600 cursor-pointer hover:text-red-500"
-                    onClick={() => removeItem(item.id)}
-                  />
+                {/* Desktop layout */}
+                <div className="hidden md:grid grid-cols-7 lg:gap-4 items-center text-center md:text-left">
+                  <div className="flex justify-center md:justify-start">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-28 w-28 object-cover rounded"
+                    />
+                  </div>
+                  <div className="md:col-span-2 md:pl-3 lg:pl-0">
+                    <p className="font-medium text-lg">{item.name}</p>
+                    <p className="text-gray-500 text-sm">Size: {item.size}</p>
+                  </div>
+                  <div className="flex justify-center md:justify-start lg:justify-center items-center">
+                    <div className="flex items-center border border-gray-300 rounded overflow-hidden">
+                      <button
+                        onClick={() => decrementQuantity(item.id)}
+                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="text"
+                        readOnly
+                        value={item.quantity}
+                        className="w-10 lg:w-9 xl:w-10 text-center text-base"
+                      />
+                      <button
+                        onClick={() => incrementQuantity(item.id)}
+                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="text-gray-800 text-base text-center">
+                    ₹{item.price.toFixed(2)}
+                  </div>
+                  <div className="text-gray-800 text-base text-center">
+                    ₹{(item.price * item.quantity).toFixed(2)}
+                  </div>
+                  <div className="flex justify-center">
+                    <Trash2
+                      className="text-gray-600 cursor-pointer hover:text-red-500"
+                      onClick={() => removeItem(item.id)}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
 
             {/* Continue Shopping */}
             <div className="mt-6">
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm text-gray-600">
-                <ArrowLeft size={16} />
-                Continue Shopping
-              </button>
+              <Link to="/products">
+                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm text-gray-600">
+                  <ArrowLeft size={16} />
+                  Continue Shopping
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -197,9 +221,11 @@ export default function CartPage() {
               <span>Total</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
-            <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center transition">
-              <Link to="/checkout">Proceed to Checkout</Link>
-            </button>
+            <Link to="/checkout">
+              <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center transition">
+                Proceed to Checkout
+              </button>
+            </Link>
           </div>
         </div>
       )}
