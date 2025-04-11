@@ -8,48 +8,48 @@ const coreValues = [
     title: "Quality First",
     description:
       "We are committed to delivering top-quality cleaning products that ensure safety, effectiveness, and satisfaction in every use.",
-    color: "bg-blue-100",
-    text: "text-blue-600",
+    color: "bg-[#78BEFF]",
+    text: "text-[#5593FF]",
   },
   {
     icon: "/images/CoreValue2.png",
     title: "Innovation",
     description:
       "We constantly evolve and innovate our formulas and processes to provide cutting-edge solutions that meet changing customer needs.",
-    color: "bg-orange-100",
-    text: "text-orange-500",
+    color: "bg-[#FFBFB5]",
+    text: "text-[#FF7F55]",
   },
   {
     icon: "/images/CoreValue3.png",
     title: "Customer-Centricity",
     description:
       "Our customers are at the heart of everything we do. We listen, respond, and strive to exceed their expectations with reliable products and support.",
-    color: "bg-purple-100",
-    text: "text-purple-600",
+    color: "bg-[#B2A7F8]",
+    text: "text-[#A649F3]",
   },
   {
     icon: "/images/CoreValue4.png",
     title: "Sustainability",
     description:
       "We believe in protecting the environment. Our practices and products are designed to minimize waste and promote eco-friendly cleaning.",
-    color: "bg-green-100",
-    text: "text-green-600",
+    color: "bg-[#A8FA9B]",
+    text: "text-[#49F349]",
   },
   {
     icon: "/images/CoreValue5.png",
     title: "Consistency",
     description:
       "From the first drop to the last, our products reflect consistent performance and dependable results.",
-    color: "bg-yellow-100",
-    text: "text-yellow-600",
+    color: "bg-[#FFD23F]",
+    text: "text-[#F3CB49]",
   },
   {
     icon: "/images/CoreValue6.png",
     title: "Growth & Excellence",
     description:
       "We aim for continuous growth by setting high standards, embracing challenges, and pushing boundaries to achieve excellence.",
-    color: "bg-orange-200",
-    text: "text-orange-600",
+    color: "bg-[#FF8551]",
+    text: "text-[#F38449]",
   },
 ];
 
