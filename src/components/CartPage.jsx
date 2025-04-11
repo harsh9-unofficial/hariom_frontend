@@ -21,6 +21,30 @@ const initialCartItems = [
   },
 ];
 
+// Empty Cart UI
+function EmptyCart() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-20 gap-5 xl:gap-8 2xl:gap-5">
+      {/* <img
+        src="/images/empty-cart.png"
+        alt="Empty Cart"
+        className="max-w-[300px] w-full mb-8"
+      /> */}
+      <h2 className="text-xl font-semibold mb-2">
+        Your Cart is Currently Empty.
+      </h2>
+      {/* <p className="text-gray-500 mb-6">
+        Login to see the items you added previously
+      </p> */}
+      <Link to="/products">
+        <button className="bg-[#558AFF] text-white px-6 py-2 rounded cursor-pointer transition">
+          Continue Shopping
+        </button>
+      </Link>
+    </div>
+  );
+}
+
 export default function CartPage() {
   const [cartItems, setCartItems] = useState(initialCartItems);
 
@@ -51,26 +75,24 @@ export default function CartPage() {
     0
   );
 
-  const shipping = cartItems.length > 0 ? 20 : 0; // Only add shipping if cart has items
-  const tax = cartItems.length > 0 ? 20 : 0; // Only add tax if cart has items
+  const shipping = cartItems.length > 0 ? 20 : 0;
+  const tax = cartItems.length > 0 ? 20 : 0;
   const total = subtotal + shipping + tax;
 
   return (
     <div className="px-2 py-12 container mx-auto">
       {/* Header */}
-      <h2 className="text-4xl font-semibold mb-2">Cart Page</h2>
-      <p className="text-xl text-gray-500 mb-8">Home / Cart Page</p>
+      <h2 className="text-3xl md:text-4xl font-semibold mb-2">Cart Page</h2>
+      <p className="text-lg md:text-xl text-gray-500 mb-8">Home / Cart Page</p>
 
       {/* Cart Content */}
       {cartItems.length === 0 ? (
-        <div className="text-center text-xl text-gray-500">
-          Your cart is currently empty.
-        </div>
+        <EmptyCart />
       ) : (
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Left - Cart Table */}
+          {/* Cart Items */}
           <div className="flex-1">
-            {/* Cart Table Header */}
+            {/* Table Header (Large Screens Only) */}
             <div className="hidden lg:grid grid-cols-7 gap-4 font-medium border-b border-gray-300 pb-4 text-lg text-gray-600 text-center">
               <div>Product</div>
               <div className="col-span-2">Description</div>
@@ -80,47 +102,45 @@ export default function CartPage() {
               <div>Actions</div>
             </div>
 
-            {/* Item List */}
+            {/* Cart Items */}
             {cartItems.map((item) => (
               <div
                 key={item.id}
-                className="border-b border-gray-300 py-4 md:grid md:grid-cols-7 md:gap-4 md:items-center text-center"
+                className="border-b border-gray-300 py-4 grid grid-cols-2 md:grid-cols-7 lg:gap-4 items-center text-center md:text-left"
               >
                 {/* Product Image */}
-                <div className="flex justify-center md:block mb-4 md:mb-0">
+                <div className="flex justify-center md:justify-start">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="h-32 w-32 object-cover rounded"
+                    className="h-28 w-28 object-cover rounded"
                   />
                 </div>
 
                 {/* Description */}
-                <div className="col-span-2 text-left mb-2 md:mb-0">
-                  <p className="font-medium text-lg md:text-2xl">{item.name}</p>
-                  <p className="text-gray-500 text-sm md:text-xl">
-                    Size: {item.size}
-                  </p>
+                <div className="md:col-span-2 md:pl-3 lg:pl-0">
+                  <p className="font-medium text-lg">{item.name}</p>
+                  <p className="text-gray-500 text-sm">Size: {item.size}</p>
                 </div>
 
                 {/* Quantity */}
-                <div className="flex justify-center items-center mb-2 md:mb-0">
-                  <div className="flex items-center border border-gray-300 rounded">
+                <div className="flex justify-center md:justify-start lg:justify-center items-center">
+                  <div className="flex items-center border border-gray-300 rounded overflow-hidden">
                     <button
                       onClick={() => decrementQuantity(item.id)}
-                      className="px-3 md:px-5 py-2 md:py-4 text-gray-600"
+                      className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
                     >
                       -
                     </button>
                     <input
                       type="text"
-                      value={item.quantity}
                       readOnly
-                      className="w-8 text-center border-0"
+                      value={item.quantity}
+                      className="w-10 lg:w-9 xl:w-10 text-center text-base"
                     />
                     <button
                       onClick={() => incrementQuantity(item.id)}
-                      className="px-3 md:px-5 py-2 md:py-4 text-gray-600"
+                      className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
                     >
                       +
                     </button>
@@ -128,16 +148,16 @@ export default function CartPage() {
                 </div>
 
                 {/* Price */}
-                <div className="text-gray-800 text-base md:text-lg mb-1 md:mb-0">
+                <div className="text-gray-800 text-base text-center">
                   ₹{item.price.toFixed(2)}
                 </div>
 
                 {/* Total */}
-                <div className="text-gray-800 text-base md:text-lg mb-1 md:mb-0">
+                <div className="text-gray-800 text-base text-center">
                   ₹{(item.price * item.quantity).toFixed(2)}
                 </div>
 
-                {/* Delete Button */}
+                {/* Delete */}
                 <div className="flex justify-center">
                   <Trash2
                     className="text-gray-600 cursor-pointer hover:text-red-500"
@@ -156,8 +176,8 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Right - Order Summary */}
-          <div className="w-full lg:w-[25%] h-fit border border-gray-300 rounded-lg p-6 space-y-6 mt-6 lg:mt-0">
+          {/* Order Summary */}
+          <div className="w-full lg:w-[25%] h-fit border border-gray-300 rounded-lg p-6 space-y-6 mt-4 lg:mt-0">
             <h3 className="text-xl font-semibold">Order Summary</h3>
             <div className="space-y-2 text-gray-600 border-b border-gray-200 pb-4">
               <div className="flex justify-between">
@@ -173,12 +193,11 @@ export default function CartPage() {
                 <span>₹{tax.toFixed(2)}</span>
               </div>
             </div>
-
-            <div className="flex justify-between font-medium">
+            <div className="flex justify-between font-medium text-lg">
               <span>Total</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
-            <button className="w-full bg-blue-500 text-white py-4 rounded cursor-pointer text-">
+            <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center transition">
               <Link to="/checkout">Proceed to Checkout</Link>
             </button>
           </div>

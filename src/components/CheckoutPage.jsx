@@ -6,19 +6,28 @@ const CheckoutPage = () => {
   // Example product data
   const products = [
     { id: 1, name: "Revitalizing Hair Serum", price: 120, quantity: 1 },
-    { id: 2, name: "Nourishing Face Cream", price: 200, quantity: 1 }
+    { id: 2, name: "Nourishing Face Cream", price: 200, quantity: 1 },
   ];
 
   // Calculate subtotal, shipping, tax, and total
-  const subtotal = products.reduce((acc, product) => acc + product.price * product.quantity, 0);
+  const subtotal = products.reduce(
+    (acc, product) => acc + product.price * product.quantity,
+    0
+  );
   const shipping = 20; // Flat shipping cost
   const tax = (subtotal * 0.1).toFixed(2); // Tax as 10% of subtotal
-  const total = (parseFloat(subtotal) + parseFloat(shipping) + parseFloat(tax)).toFixed(2);
+  const total = (
+    parseFloat(subtotal) +
+    parseFloat(shipping) +
+    parseFloat(tax)
+  ).toFixed(2);
 
   return (
     <div className="container mx-auto px-2 py-8">
-      <h2 className="text-4xl font-semibold mb-2">Check Out</h2>
-      <p className="text-xl text-gray-500 mb-6">Home / Check Out</p>
+      <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
+        Check Out
+      </h2>
+      <p className="text-lg md:text-xl text-gray-500 mb-6">Home / Check Out</p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* LEFT SIDE - Contact, Address, Payment */}
@@ -201,7 +210,10 @@ const CheckoutPage = () => {
           <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
           <div className="space-y-4">
             {products.map((product) => (
-              <div key={product.id} className="flex justify-between items-center">
+              <div
+                key={product.id}
+                className="flex justify-between items-center"
+              >
                 <div className="flex items-center gap-3">
                   <img
                     src="/images/Product1.png"
@@ -210,7 +222,9 @@ const CheckoutPage = () => {
                   />
                   <div>
                     <p className="text-md font-medium">{product.name}</p>
-                    <p className="text-sm text-gray-500">Qty: {product.quantity}</p>
+                    <p className="text-sm text-gray-500">
+                      Qty: {product.quantity}
+                    </p>
                   </div>
                 </div>
                 <p className="text-md font-medium">₹{product.price}</p>

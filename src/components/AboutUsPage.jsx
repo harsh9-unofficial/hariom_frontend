@@ -78,7 +78,7 @@ const AboutUsPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white">
+      <div className="flex flex-col md:flex-row items-center justify-between lg:gap-4 bg-white">
         {/* Text Section */}
         <div className="md:w-1/2 lg:w-2/5 xl:w-9/20 2xl:w-1/2 text-center md:text-left py-8 md:p-12 lg:px-8 lg:p-0 xl:p-18 2xl:p-32">
           <p className="text-[#558bffe4] font-medium text-lg lg:text-xl mb-2">

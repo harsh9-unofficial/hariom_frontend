@@ -203,7 +203,9 @@ const AllProductPage = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4">
                 <div>
-                  <span className="text-base lg:text-lg text-gray-500">Min</span>
+                  <span className="text-base lg:text-lg text-gray-500">
+                    Min
+                  </span>
                   <input
                     type="text"
                     value={priceRange.min}
@@ -218,7 +220,9 @@ const AllProductPage = () => {
                   />
                 </div>
                 <div>
-                  <span className="text-base lg:text-lg text-gray-500">Max</span>
+                  <span className="text-base lg:text-lg text-gray-500">
+                    Max
+                  </span>
                   <input
                     type="text"
                     value={priceRange.max}
@@ -254,7 +258,10 @@ const AllProductPage = () => {
                       {"☆".repeat(5 - stars)}
                     </span>
                     {stars !== 5 && (
-                      <span className="text-base text-gray-400 ml-1"> & Up</span>
+                      <span className="text-base text-gray-400 ml-1">
+                        {" "}
+                        & Up
+                      </span>
                     )}
                   </span>
                 </label>
@@ -293,8 +300,11 @@ const AllProductPage = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="text-sm font-medium text-black">{product.name}</h3>
+              <div className="py-4 px-3">
+                <h3 className="text-sm font-medium text-black truncate whitespace-nowrap overflow-hidden">
+                  {product.name}
+                </h3>
+
                 <p className="text-[#558AFF] text-sm font-semibold mt-1">
                   ₹{product.price}
                 </p>

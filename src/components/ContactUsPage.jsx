@@ -7,8 +7,10 @@ const handleSubmit = (e) => {
 const ContactUsPage = () => {
   return (
     <div className="container mx-auto px-2 py-8">
-      <h1 className="text-4xl font-semibold mb-2">Contact Us</h1>
-      <p className="text-gray-500 mb-6 text-xl">Home / Contact Us</p>
+      <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
+        Contact Us
+      </h2>
+      <p className="text-lg md:text-xl text-gray-500 mb-6">Home / Contact Us</p>
 
       <p className="text-gray-700 mb-10 max-w-xl">
         Get in touch with our team for inquiries about our products and
@@ -52,16 +54,16 @@ const ContactUsPage = () => {
 
         {/* Info and Map */}
         <div className="space-y-6">
-          <h2 className="text-4xl font-semibold">Get in touch</h2>
+          <h2 className="text-2xl md:text-4xl font-semibold">Get in touch</h2>
           <div className="flex gap-4">
-            <div className="bg-[#558AFF] text-white p-4 rounded-full cursor-pointer">
-              <Phone size={24} />
+            <div className="bg-[#558AFF] text-white p-3 md:p-4 rounded-full cursor-pointer">
+              <Phone size={20} className="md:size-5 lg:size-6" />
             </div>
-            <div className="bg-[#558AFF] text-white p-4 rounded-full cursor-pointer">
-              <Mail size={24} />
+            <div className="bg-[#558AFF] text-white p-3 md:p-4 rounded-full cursor-pointer">
+              <Mail size={20} className="sm:size-5 lg:size-6" />
             </div>
-            <div className="bg-[#558AFF] text-white p-4 rounded-full cursor-pointer">
-              <MapPin size={24} />
+            <div className="bg-[#558AFF] text-white p-3 md:p-4 rounded-full cursor-pointer">
+              <MapPin size={20} className="sm:size-5 lg:size-6" />
             </div>
           </div>
 

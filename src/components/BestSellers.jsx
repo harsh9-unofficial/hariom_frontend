@@ -77,8 +77,10 @@ export default function BestSellers() {
             </div>
 
             {/* Product Details */}
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-black">{product.name}</h3>
+              <div className="py-4 px-3">
+              <h3 className="text-sm font-medium text-black truncate whitespace-nowrap overflow-hidden">
+                {product.name}
+              </h3>
               <p className="text-blue-500 text-sm font-semibold mt-1">
                 ${product.price.toFixed(2)}
               </p>
