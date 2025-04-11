@@ -17,7 +17,7 @@ export default function PromoBanner() {
           <p className="text-base md:text-lg xl:text-xl  mb-5">
             Get 20% off on all cleaning bundles. Limited time offer.
           </p>
-          <button className="bg-white text-black text-sm sm:text-base font-medium px-5 py-2 rounded hover:bg-gray-100 transition">
+          <button className="bg-white text-black text-sm sm:text-base font-medium px-5 py-2 rounded cursor-pointer transition">
             Shop Deals
           </button>
         </div>

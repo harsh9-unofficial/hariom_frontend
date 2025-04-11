@@ -13,7 +13,7 @@ const TrackOrderPage = () => {
       ? "bg-[#558AFF] text-white font-medium"
       : "hover:bg-gray-100 text-black";
 
-  const currentStep = 2;
+  const currentStep = 1;
   return (
     <div className="container mx-auto px-2 py-12">
       <h1 className="text-2xl font-semibold mb-1">Track Your Order</h1>
@@ -124,7 +124,7 @@ const TrackOrderPage = () => {
               {/* Stepper */}
               <div className="relative flex justify-between items-center mb-10 md:px-4">
                 {/* Connecting background line */}
-                <div className="absolute top-4 left-[calc(12.5%+16px)] right-[calc(12.5%+16px)] h-0.5 bg-gray-300 z-0"></div>
+                <div className="absolute top-4 left-[calc(12.5%+6px)] right-[calc(12.5%+6px)] h-0.5 bg-gray-300 z-0"></div>
 
                 {/* Progress line */}
                 <div

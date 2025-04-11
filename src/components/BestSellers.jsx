@@ -1,6 +1,6 @@
 import { PiShoppingCart } from "react-icons/pi";
 import { GoHeart } from "react-icons/go";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const products = [
   {
@@ -30,10 +30,12 @@ const products = [
 ];
 
 export default function BestSellers() {
+  const navigate = useNavigate();
+
   return (
     <section className="py-8 px-2 lg:py-12 container mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl md:text-4xl font-semibold">Best Sellers</h2>
+        <h2 className="text-3xl md:text-4xl font-semibold">New Arrivals</h2>
         <button className="text-lg text-gray-600 hover:text-black">
           View All <span className="ml-1 text-xl">▾</span>
         </button>
@@ -41,10 +43,10 @@ export default function BestSellers() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
         {products.map((product) => (
-          <Link
-            to={`/product/${product.id}`}
+          <div
             key={product.id}
-            className="group relative rounded-xl border border-blue-200 overflow-hidden transition"
+            className="group relative rounded-xl border border-blue-200 overflow-hidden transition cursor-pointer"
+            onClick={() => navigate(`/product/${product.id}`)}
           >
             {/* Product Image with Black Shade on Hover */}
             <div className="relative">
@@ -59,18 +61,21 @@ export default function BestSellers() {
 
               {/* Icons on Hover */}
               <div
-                className={`absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity`}
+                className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 transition-opacity duration-300 invisible md:visible"
+                onClick={(e) => e.stopPropagation()}
               >
-                <Link to="/wishlist">
-                  <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
-                    <GoHeart />
-                  </button>
-                </Link>
-                <Link to="/cart">
-                  <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
-                    <PiShoppingCart />
-                  </button>
-                </Link>
+                <button
+                  onClick={() => navigate("/wishlist")}
+                  className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                >
+                  <GoHeart />
+                </button>
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                >
+                  <PiShoppingCart />
+                </button>
               </div>
             </div>
 
@@ -83,7 +88,7 @@ export default function BestSellers() {
                 ${product.price.toFixed(2)}
               </p>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </section>

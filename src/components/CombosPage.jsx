@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PiShoppingCart } from "react-icons/pi";
 import { GoHeart } from "react-icons/go";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Product List (2–3 per category)
 const products = [
@@ -107,6 +108,8 @@ const products = [
 ];
 
 const CombosPage = () => {
+  const navigate = useNavigate();
+
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
   const [selectedRatings, setSelectedRatings] = useState([]);
@@ -271,10 +274,10 @@ const CombosPage = () => {
         {/* Products Grid */}
         <div className="col-span-2 lg:col-span-4 xl:col-span-6 grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
           {filteredProducts.map((product) => (
-            <Link
-              to={`/product/${product.id}`}
+            <div
               key={product.id}
-              className="group relative rounded-xl border border-[#558bffb3] overflow-hidden transition h-fit"
+              className="group relative rounded-xl border border-[#558bffb3] overflow-hidden transition h-fit cursor-pointer"
+              onClick={() => navigate(`/product/${product.id}`)}
             >
               <div className="relative">
                 <img
@@ -283,29 +286,35 @@ const CombosPage = () => {
                   className="w-full bg-blue-100"
                 />
                 <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
-                <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Link to="/wishlist">
-                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
-                      <GoHeart />
-                    </button>
-                  </Link>
-                  <Link to="/cart">
-                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
-                      <PiShoppingCart />
-                    </button>
-                  </Link>
+
+                {/* Icons on Hover */}
+                <div
+                  className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 transition-opacity duration-300 invisible md:visible"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => navigate("/wishlist")}
+                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                  >
+                    <GoHeart />
+                  </button>
+                  <button
+                    onClick={() => navigate("/cart")}
+                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                  >
+                    <PiShoppingCart />
+                  </button>
                 </div>
               </div>
               <div className="py-4 px-3">
                 <h3 className="text-sm font-medium text-black truncate whitespace-nowrap overflow-hidden">
                   {product.name}
                 </h3>
-
                 <p className="text-[#558AFF] text-sm font-semibold mt-1">
                   ₹{product.price}
                 </p>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
