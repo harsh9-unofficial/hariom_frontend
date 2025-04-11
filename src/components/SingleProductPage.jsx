@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const SingleProductPage = () => {
   const [activeTab, setActiveTab] = useState("description");
-  const [mainImage, setMainImage] = useState("/images/Category1.png");
+  const [mainImage, setMainImage] = useState("/images/Product1.png");
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
