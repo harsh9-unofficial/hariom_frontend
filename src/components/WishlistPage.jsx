@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 // Empty Cart UI
-function EmptyCart() {
+function EmptyWishlist() {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 gap-5 xl:gap-8 2xl:gap-5">
       <h2 className="text-xl font-semibold mb-2">
@@ -40,13 +40,13 @@ const WishlistPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-12">
       <h1 className="text-4xl font-semibold mb-2">Wishlist</h1>
-      <p className="text-gray-500 mb-6 text-lg">Home / Wishlist</p>
+      <p className="text-gray-500 mb-8 text-lg">Home / Wishlist</p>
 
       {wishlistItems.length === 0 ? (
         // <div className="text-center text-lg text-gray-500">
-        <EmptyCart />
+        <EmptyWishlist />
       ) : (
         // </div>
         <>
