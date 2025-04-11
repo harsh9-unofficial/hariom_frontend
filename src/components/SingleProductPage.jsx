@@ -148,7 +148,7 @@ const SingleProductPage = () => {
             </Link>
 
             <Link
-              to=""
+              to="/checkout"
               className="border border-[#558AFF] text-[#558AFF] px-4 py-2 md:py-3 rounded-md w-1/2 md:text-lg cursor-pointer text-center"
             >
               Buy Now
