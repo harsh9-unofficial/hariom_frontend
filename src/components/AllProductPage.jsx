@@ -286,18 +286,16 @@ const AllProductPage = () => {
                 />
                 <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
                 <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
-                  >
-                    <GoHeart />
-                  </button>
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
-                  >
-                    <PiShoppingCart />
-                  </button>
+                  <Link to="/wishlist">
+                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
+                      <GoHeart />
+                    </button>
+                  </Link>
+                  <Link to="/cart">
+                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
+                      <PiShoppingCart />
+                    </button>
+                  </Link>
                 </div>
               </div>
               <div className="py-4 px-3">

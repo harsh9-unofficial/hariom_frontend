@@ -157,9 +157,7 @@ const CombosPage = () => {
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
         Combos
       </h2>
-      <p className="text-lg md:text-xl text-gray-500 mb-6">
-        Home / Combos
-      </p>
+      <p className="text-lg md:text-xl text-gray-500 mb-6">Home / Combos</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-8 space-y-4 md:space-y-0 md:gap-4">
         {/* Sidebar */}
@@ -286,18 +284,16 @@ const CombosPage = () => {
                 />
                 <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
                 <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
-                  >
-                    <GoHeart />
-                  </button>
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
-                  >
-                    <PiShoppingCart />
-                  </button>
+                  <Link to="/wishlist">
+                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
+                      <GoHeart />
+                    </button>
+                  </Link>
+                  <Link to="/cart">
+                    <button className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer">
+                      <PiShoppingCart />
+                    </button>
+                  </Link>
                 </div>
               </div>
               <div className="py-4 px-3">

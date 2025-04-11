@@ -112,7 +112,7 @@ export default function CartPage() {
                       <div className="flex items-center border border-gray-300 rounded overflow-hidden">
                         <button
                           onClick={() => decrementQuantity(item.id)}
-                          className="px-3 py-2 text-gray-600 text-sm"
+                          className="px-3 py-2 text-gray-600 text-sm cursor-pointer"
                         >
                           -
                         </button>
@@ -124,7 +124,7 @@ export default function CartPage() {
                         />
                         <button
                           onClick={() => incrementQuantity(item.id)}
-                          className="px-3 py-2 text-gray-600 text-sm"
+                          className="px-3 py-2 text-gray-600 text-sm cursor-pointer"
                         >
                           +
                         </button>
@@ -155,7 +155,7 @@ export default function CartPage() {
                     <div className="flex items-center border border-gray-300 rounded overflow-hidden">
                       <button
                         onClick={() => decrementQuantity(item.id)}
-                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
+                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg cursor-pointer"
                       >
                         -
                       </button>
@@ -167,7 +167,7 @@ export default function CartPage() {
                       />
                       <button
                         onClick={() => incrementQuantity(item.id)}
-                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg"
+                        className="px-3 lg:px-2 xl:px-3 py-2 text-gray-600 text-lg cursor-pointer"
                       >
                         +
                       </button>
