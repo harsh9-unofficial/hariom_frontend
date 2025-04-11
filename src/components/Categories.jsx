@@ -19,7 +19,7 @@ export default function Categories() {
             <img
               src={cat.image}
               alt={cat.name}
-              className="w-[170px] h-[170px] md:w-[220px] md:h-[220px] lg:w-[250px] lg:h-[230px] rounded-xl mx-auto mb-2 hover:scale-105 transition-transform duration-300"
+              className="w-[170px] h-[170px] md:w-[220px] md:h-[220px] lg:w-[250px] lg:h-[230px] rounded-xl mx-auto mb-2 hover:scale-105 cursor-pointer transition-transform duration-300"
             />
             <p className="text-xl font-medium">{cat.name}</p>
           </div>

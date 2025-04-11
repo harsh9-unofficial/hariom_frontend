@@ -13,7 +13,7 @@ const TrackOrderPage = () => {
       ? "bg-[#558AFF] text-white font-medium"
       : "hover:bg-gray-100 text-black";
 
-  const currentStep = 4;
+  const currentStep = 2;
   return (
     <div className="container mx-auto px-2 py-12">
       <h1 className="text-2xl font-semibold mb-1">Track Your Order</h1>
