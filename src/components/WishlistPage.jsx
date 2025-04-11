@@ -3,6 +3,22 @@ import { FaChevronLeft } from "react-icons/fa";
 import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Empty Cart UI
+function EmptyCart() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-20 gap-5 xl:gap-8 2xl:gap-5">
+      <h2 className="text-xl font-semibold mb-2">
+        Your Wishlist is Currently Empty.
+      </h2>
+      <Link to="/products">
+        <button className="bg-[#558AFF] text-white px-6 py-2 rounded cursor-pointer transition">
+          Continue Shopping
+        </button>
+      </Link>
+    </div>
+  );
+}
+
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([
     {
@@ -29,10 +45,10 @@ const WishlistPage = () => {
       <p className="text-gray-500 mb-6 text-lg">Home / Wishlist</p>
 
       {wishlistItems.length === 0 ? (
-        <div className="text-center text-lg text-gray-500">
-          Your wishlist is currently empty.
-        </div>
+        // <div className="text-center text-lg text-gray-500">
+        <EmptyCart />
       ) : (
+        // </div>
         <>
           {/* Table headers for md+ only */}
           <div className="hidden md:grid grid-cols-7 font-semibold text-gray-600 border-b border-gray-300 gap-4 pb-2">
@@ -107,16 +123,15 @@ const WishlistPage = () => {
               </div>
             </div>
           ))}
+          {/* Continue Shopping Button */}
+          <div className="mt-8">
+            <button className="flex items-center gap-4 border border-gray-300 px-4 py-2 rounded cursor-pointer transition">
+              <FaChevronLeft />
+              Continue Shopping
+            </button>
+          </div>
         </>
       )}
-
-      {/* Continue Shopping Button */}
-      <div className="mt-8">
-        <button className="flex items-center gap-4 border border-gray-300 px-4 py-2 rounded cursor-pointer transition">
-          <FaChevronLeft />
-          Continue Shopping
-        </button>
-      </div>
     </div>
   );
 };
