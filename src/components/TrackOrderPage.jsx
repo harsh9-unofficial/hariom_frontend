@@ -15,7 +15,7 @@ const TrackOrderPage = () => {
 
   const currentStep = 4;
   return (
-    <div className="container mx-auto px-2 py-10">
+    <div className="container mx-auto px-2 py-12">
       <h1 className="text-2xl font-semibold mb-1">Track Your Order</h1>
       <p className="text-gray-500 mb-6">Home / Track Your Order</p>
 

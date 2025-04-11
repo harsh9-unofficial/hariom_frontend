@@ -73,7 +73,7 @@ const AboutUsPage = () => {
         </div>
 
         {/* AboutUs Text */}
-        <div className="container mx-auto px-4 md:px-4 xl:px-0 absolute inset-0 flex items-center z-0">
+        <div className="container mx-auto px-4 xl:px-0 absolute inset-0 flex items-center z-0">
           <h1 className="text-white text-4xl md:text-5xl">About Us</h1>
         </div>
       </div>

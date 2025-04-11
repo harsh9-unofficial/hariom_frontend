@@ -222,7 +222,7 @@ export default function CartPage() {
               <span>₹{total.toFixed(2)}</span>
             </div>
             <Link to="/checkout">
-              <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center transition">
+              <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center cursor-pointer transition">
                 Proceed to Checkout
               </button>
             </Link>

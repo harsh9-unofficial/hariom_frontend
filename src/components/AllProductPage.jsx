@@ -153,7 +153,7 @@ const AllProductPage = () => {
   });
 
   return (
-    <section className="container mx-auto px-2 py-8">
+    <section className="container mx-auto px-2 py-12">
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
         All Products
       </h2>
