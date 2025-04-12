@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { useState, useRef } from "react";
 
 const MediaBlock = () => {
-  const [isPlaying, setIsPlaying] = useState(false); // State to track if the video is playing
-  const videoRef = useRef(null); // Ref to access the video element
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
 
   const handlePlayClick = () => {
     setIsPlaying(true);
-    videoRef.current.play(); // Start the video when the play button is clicked
+    videoRef.current.play();
   };
   return (
     <section className="container mx-auto flex flex-col md:flex-row justify-center items-center md:items-end gap-4 lg:gap-12 xl:gap-16 2xl:gap-20 px-2 md:px-4 lg:px-10 xl:px-8  py-20">
@@ -39,17 +39,20 @@ const MediaBlock = () => {
           ref={videoRef} // Attach the ref to the video element
           className="w-full h-full object-cover"
           onPlay={() => setIsPlaying(true)} // Set to true when video starts playing
-          onPause={() => setIsPlaying(false)} // Optional: reset if video is paused
           controls={false} // Remove native controls, you control playback via the button
+          loop // Make the video repeat infinitely
         >
-          <source src="/MediaBlock.mp4" type="video/mp4" />
+          <source src="/MediaBlock2.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 
         {/* Play Icon Overlay */}
         {!isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition">
-            <button onClick={handlePlayClick} className="text-white">
+            <button
+              onClick={handlePlayClick}
+              className="text-white cursor-pointer"
+            >
               <PlayCircle className="w-12 h-12 md:w-16 md:h-16" />
             </button>
           </div>
