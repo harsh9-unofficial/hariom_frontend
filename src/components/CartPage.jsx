@@ -191,11 +191,12 @@ export default function CartPage() {
 
             {/* Continue Shopping */}
             <div className="mt-6">
-              <Link to="/products">
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm text-gray-600">
-                  <ArrowLeft size={16} />
-                  Continue Shopping
-                </button>
+              <Link
+                to="/products"
+                className="flex items-center w-fit gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm text-gray-600"
+              >
+                <ArrowLeft size={16} />
+                Continue Shopping
               </Link>
             </div>
           </div>
