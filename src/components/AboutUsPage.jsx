@@ -57,16 +57,13 @@ const AboutUsPage = () => {
   return (
     <>
       <div
-        className="relative w-full h-[400px] md:h-[475px] lg:h-[540px]"
+        className="relative w-full h-[400px] md:h-[475px] lg:h-[600px]"
         style={{
-          backgroundImage: "url(/images/PromoBanner.png)",
+          backgroundImage: "url(/images/PromoBanner1.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        {/* Black overlay */}
-        <div className="absolute inset-0 bg-black opacity-40 z-0" />
-
         {/* Header - must be above the overlay */}
         <div className="relative z-10">
           <Header pageName="AboutUsPage" />
@@ -78,9 +75,9 @@ const AboutUsPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between lg:gap-4 bg-white">
+      <div className="flex flex-col md:flex-row items-center justify-between lg:gap- bg-white">
         {/* Text Section */}
-        <div className="md:w-1/2 lg:w-2/5 xl:w-9/20 2xl:w-1/2 text-center md:text-left py-8 md:p-12 lg:px-8 lg:p-0 xl:p-18 2xl:p-32">
+        <div className="md:w-1/2 lg:w-2/5 xl:w-9/20 2xl:w-1/2 text-center md:text-left py-8 md:p-12 lg:px-8 lg:p-0 xl:p-18 2xl:py-12">
           <p className="text-[#558bffe4] font-medium text-lg lg:text-xl mb-2">
             About Hariom Chemical
           </p>
