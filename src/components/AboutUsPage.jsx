@@ -73,7 +73,7 @@ const AboutUsPage = () => {
         </div>
 
         {/* AboutUs Text */}
-        <div className="container mx-auto px-4 xl:px-0 absolute inset-0 flex items-center z-0">
+        <div className="container mx-auto px-2 md:px-4 lg:px-16 xl:px-8 absolute inset-0 flex items-center z-0">
           <h1 className="text-white text-4xl md:text-5xl">About Us</h1>
         </div>
       </div>
@@ -117,7 +117,7 @@ const AboutUsPage = () => {
       </div>
 
       {/* Core Values Section */}
-      <div className="container mx-auto px-2 lg:px-4 xl:px-0 py-8 md:py-0 lg:py-14 bg-white">
+      <div className="container mx-auto px-2 md:px-4 lg:px-16 xl:px-8 py-8 md:py-0 lg:py-14 bg-white">
         <h2 className="text-3xl md:text-4xl font-bold text-[#558AFF] mb-8 md:mb-12 text-left">
           Our Core Values
         </h2>

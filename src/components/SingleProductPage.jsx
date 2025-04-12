@@ -64,7 +64,7 @@ const SingleProductPage = () => {
     ));
 
   return (
-    <div className="py-12 px-2 container mx-auto">
+    <div className="py-12 px-2 md:px-4 lg:px-10 xl:px-8 container mx-auto">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-4">
         Home / Product /{" "}

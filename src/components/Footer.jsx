@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#558AFF] text-white px-3 md:px-6">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 lg:gap-0 py-4 md:py-7">
+    <footer className="bg-[#558AFF] text-white px-2 md:px-6">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 lg:gap-0 py-4 md:py-7 px-2 md:px-4 lg:px-10 xl:px-8 ">
         {/* Logo and Description */}
         <div className="space-y-4 col-span-1 lg:col-span-2 lg:w-[70%] pl-0 md:pl-4 lg:pl-0">
           <Link to="/">

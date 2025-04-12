@@ -156,7 +156,7 @@ const AllProductPage = () => {
   });
 
   return (
-    <section className="container mx-auto px-2 py-12">
+    <section className="container mx-auto py-12 px-2 md:px-4 lg:px-10 xl:px-8 ">
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
         All Products
       </h2>

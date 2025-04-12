@@ -51,7 +51,7 @@ const Header = ({ pageName }) => {
 
       {/* Main Navigation */}
       <nav
-        className={`container mx-auto flex justify-between items-center px-4 xl:px-0 py-3 ${
+        className={`container mx-auto flex justify-between items-center  px-2 md:px-4 lg:px-10 xl:px-8  py-3 ${
           isTransparent ? "bg-transparent" : "bg-white"
         }`}
       >

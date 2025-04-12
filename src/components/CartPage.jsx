@@ -72,7 +72,7 @@ export default function CartPage() {
   const total = subtotal + shipping + tax;
 
   return (
-    <div className="px-2 py-12 container mx-auto">
+    <div className=" px-2 md:px-4 lg:px-10 xl:px-8 py-12 container mx-auto">
       <h2 className="text-3xl md:text-4xl font-semibold mb-2">Cart Page</h2>
       <p className="text-lg md:text-xl text-gray-500 mb-8">Home / Cart Page</p>
 

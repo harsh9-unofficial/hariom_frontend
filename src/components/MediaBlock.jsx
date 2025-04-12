@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const MediaBlock = () => {
   return (
-    <section className="container mx-auto flex flex-col md:flex-row justify-center items-center md:items-end gap-4 lg:gap-12 xl:gap-16 2xl:gap-20 px-2 py-20">
+    <section className="container mx-auto flex flex-col md:flex-row justify-center items-center md:items-end gap-4 lg:gap-12 xl:gap-16 2xl:gap-20 px-2 md:px-4 lg:px-10 xl:px-8  py-20">
       {/* Logo */}
       <div className="w-32 md:w-48 flex-shrink-0 pr-8">
         <Link to="/">

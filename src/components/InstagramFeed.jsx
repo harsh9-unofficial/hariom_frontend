@@ -11,7 +11,7 @@ const posts = [
 
 export default function InstagramFeed() {
   return (
-    <section className="py-12 px-2 container mx-auto text-center">
+    <section className="py-12 container mx-auto text-center  px-2 md:px-4 lg:px-10 xl:px-8 ">
       {/* Header */}
       <h2 className="text-4xl font-semibold mb-1">Follow Us on Instagram</h2>
       <p className="text-xl text-gray-500 mb-8">@hariomchemical</p>

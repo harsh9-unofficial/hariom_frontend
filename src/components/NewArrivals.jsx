@@ -33,7 +33,7 @@ export default function NewArrivals() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-8 px-2 lg:py-12 container mx-auto">
+    <section className="py-8 lg:py-12 container mx-auto  px-2 md:px-4 lg:px-10 xl:px-8 ">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl md:text-4xl font-semibold">New Arrivals</h2>
         <button className="text-lg text-gray-600 hover:text-black">
