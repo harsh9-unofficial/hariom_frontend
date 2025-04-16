@@ -1,6 +1,6 @@
 // src/components/Header.js
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { GoSearch } from "react-icons/go";
 import { PiShoppingCart } from "react-icons/pi";
 import { GoHeart } from "react-icons/go";
@@ -10,20 +10,54 @@ import { RxCross1 } from "react-icons/rx";
 
 const Header = ({ pageName }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
+  const desktopUserMenuRef = useRef(null);
+  const mobileUserMenuRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const isTransparent = pageName === "AboutUsPage";
 
-  // Close mobile menu when route changes
+  // Close mobile menu & check auth on route change
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    setIsAuthenticated(!!(token && userId));
     setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
   }, [location.pathname]);
 
-  // Function to check if a link is active
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      const clickedOutsideDesktop =
+        desktopUserMenuRef.current &&
+        !desktopUserMenuRef.current.contains(e.target);
+
+      const clickedOutsideMobile =
+        mobileUserMenuRef.current &&
+        !mobileUserMenuRef.current.contains(e.target);
+
+      if (clickedOutsideDesktop && clickedOutsideMobile) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const isActive = (path) => location.pathname === path;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
   };
 
   const navLinks = [
@@ -33,6 +67,11 @@ const Header = ({ pageName }) => {
     { name: "About us", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
   return (
     <header
@@ -51,10 +90,11 @@ const Header = ({ pageName }) => {
 
       {/* Main Navigation */}
       <nav
-        className={`container mx-auto flex justify-between items-center  px-2 md:px-4 lg:px-10 xl:px-8  py-3 ${
+        className={`container mx-auto flex justify-between items-center px-2 md:px-4 lg:px-10 xl:px-8 py-3 ${
           isTransparent ? "bg-transparent" : "bg-white"
         }`}
       >
+        {/* Logo */}
         <div className="flex items-center">
           <Link to="/">
             <img
@@ -100,7 +140,10 @@ const Header = ({ pageName }) => {
         </ul>
 
         {/* Desktop Action Buttons */}
-        <div className="hidden md:flex space-x-2">
+        <div
+          className="hidden md:flex space-x-2 items-center relative"
+          ref={desktopUserMenuRef}
+        >
           <button className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer">
             <GoSearch />
           </button>
@@ -116,12 +159,42 @@ const Header = ({ pageName }) => {
           >
             <GoHeart />
           </Link>
-          <Link
-            to="/login"
-            className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
-          >
-            <RiUser3Line />
-          </Link>
+
+          {/* User Menu */}
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={toggleUserMenu}
+                className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
+              >
+                <RiUser3Line />
+              </button>
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-28 bg-white rounded-md shadow-lg py-2 z-50">
+                  <Link
+                    to="/track-order"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
+            >
+              <RiUser3Line />
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -153,7 +226,7 @@ const Header = ({ pageName }) => {
         </ul>
 
         {/* Mobile Action Buttons */}
-        <div className="space-x-2 flex justify-center">
+        <div className="space-x-2 flex justify-center" ref={mobileUserMenuRef}>
           <button className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer">
             <GoSearch />
           </button>
@@ -169,12 +242,40 @@ const Header = ({ pageName }) => {
           >
             <GoHeart />
           </Link>
-          <Link
-            to="/login"
-            className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
-          >
-            <RiUser3Line />
-          </Link>
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={toggleUserMenu}
+                className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
+              >
+                <RiUser3Line />
+              </button>
+              {isUserMenuOpen && (
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-28 bg-white rounded-md shadow-lg py-2 z-50">
+                  <Link
+                    to="/track-order"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100 text-left"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-4 py-2 text-red-600 hover:bg-gray-100 text-left"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="text-white p-3 bg-[#558AFF] rounded-full text-xl focus:outline-none cursor-pointer"
+            >
+              <RiUser3Line />
+            </Link>
+          )}
         </div>
       </div>
     </header>

@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="space-y-4 col-span-1 lg:col-span-2 lg:w-[70%] pl-0 md:pl-4 lg:pl-0">
           <Link to="/">
             <img
-              src="/images/logo3.png"
+              src="/images/footerLogo.jpg"
               alt="Hariom Chemicals Logo"
               className="h-auto"
             />

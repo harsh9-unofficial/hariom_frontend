@@ -1,7 +1,32 @@
 import { Phone, Mail, MapPin } from "lucide-react";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
+import { toast } from "react-hot-toast";
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
+
+  const name = e.target.name.value;
+  const email = e.target.email.value;
+  const message = e.target.message.value;
+
+  try {
+    const response = await axios.post(`${USER_BASE_URL}/api/contacts/addContact`, {
+      name,
+      email,
+      message,
+    });
+
+    if (response.status === 201) {
+      toast.success("Message sent successfully!");
+      e.target.reset(); // Reset the form
+    } else {
+      toast.error("Failed to send message. Please try again later.");
+    }
+  } catch (error) {
+    console.error("Axios error:", error);
+    toast.error("An error occurred. Please try again.");
+  }
 };
 
 const ContactUsPage = () => {
@@ -17,13 +42,14 @@ const ContactUsPage = () => {
         services.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4 lg:gap-8">
         {/* Contact Form */}
         <form className="space-y-6 md:pt-8" onSubmit={handleSubmit}>
           <div>
             <label className="block font-medium mb-1 text-xl">Name</label>
             <input
               type="text"
+              name="name"
               placeholder="Your Name"
               className="w-full border border-blue-200 rounded px-4 py-4 outline-none focus:ring-2 focus:ring-[#558AFF]"
             />
@@ -32,6 +58,7 @@ const ContactUsPage = () => {
             <label className="block font-medium mb-1 text-xl">Email</label>
             <input
               type="email"
+              name="email"
               placeholder="Your Email"
               className="w-full border border-blue-200 rounded px-4 py-4 outline-none focus:ring-2 focus:ring-[#558AFF]"
             />
@@ -40,6 +67,7 @@ const ContactUsPage = () => {
             <label className="block font-medium mb-1 text-xl">Message</label>
             <textarea
               rows="9"
+              name="message"
               placeholder="Your Message"
               className="w-full border border-blue-200 rounded px-4 py-4 outline-none focus:ring-2 focus:ring-[#558AFF] resize-none"
             ></textarea>

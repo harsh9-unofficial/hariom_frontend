@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
 
 const SingleProductPage = () => {
+  const { id } = useParams(); // Get product ID from URL
   const [activeTab, setActiveTab] = useState("description");
-  const [mainImage, setMainImage] = useState("/images/Product1.png");
+  const [mainImage, setMainImage] = useState("");
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -25,6 +31,74 @@ const SingleProductPage = () => {
       time: "2 Month ago",
     },
   ]);
+
+  // Fetch product details
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${USER_BASE_URL}/api/products/${id}`);
+        console.log("Product data:", response.data);
+        console.log("Images raw:", response.data.images);
+        console.log("Images type:", typeof response.data.images);
+
+        // Normalize images
+        let images = response.data.images;
+        if (typeof images === "string") {
+          try {
+            images = JSON.parse(images); // Parse stringified JSON array
+            console.log("Parsed images:", images);
+          } catch (e) {
+            console.error("Error parsing images:", e);
+            images = [];
+          }
+        }
+        images = Array.isArray(images) ? images : images ? [images] : [];
+        console.log("Normalized images:", images);
+
+        // Normalize features
+        let features = response.data.features;
+        if (typeof features === "string") {
+          try {
+            features = JSON.parse(features.replace(/'/g, '"'));
+          } catch (e) {
+            console.error("Error parsing features:", e);
+            features = [];
+          }
+        }
+        features = Array.isArray(features)
+          ? features
+          : features
+          ? [features]
+          : [];
+
+        const normalizedProduct = {
+          ...response.data,
+          images,
+          features,
+        };
+        console.log("Final normalized product:", normalizedProduct);
+
+        // Remove duplicates from features
+        normalizedProduct.features = [...new Set(normalizedProduct.features)];
+        setProduct(normalizedProduct);
+
+        // Set main image
+        const firstImage = normalizedProduct.images[0]
+          ? `${USER_BASE_URL}/${normalizedProduct.images[0]}`
+          : "/images/Product1.png";
+        console.log("Setting main image to:", firstImage);
+        setMainImage(firstImage);
+      } catch (err) {
+        setError("Failed to load product data.");
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const tabClass = (tab) =>
     `py-2 px-4 text-lg font-medium transition-colors duration-200 ease-in-out cursor-pointer ${
@@ -63,12 +137,16 @@ const SingleProductPage = () => {
       </span>
     ));
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!product) return <div>Product not found.</div>;
+
   return (
     <div className="py-12 px-2 md:px-4 lg:px-10 xl:px-8 container mx-auto">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-4">
         Home / Product /{" "}
-        <span className="text-gray-900 font-medium">Gold Infinity Ring</span>
+        <span className="text-gray-900 font-medium">{product.name}</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
@@ -77,52 +155,71 @@ const SingleProductPage = () => {
           <div className="rounded-2xl">
             <img
               src={mainImage}
-              alt="Product"
+              alt={product.name}
               className="rounded-xl w-full object-contain"
+              onError={(e) => {
+                e.target.src = "/images/Product1.png"; // Fallback image
+              }}
             />
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3, 4].map((_, i) => {
-              const thumbnailSrc = `/images/Category${i + 1}.png`;
-              return (
-                <img
-                  key={i}
-                  src={thumbnailSrc}
-                  alt={`Thumb ${i}`}
-                  className="rounded-lg border object-contain w-full cursor-pointer hover:shadow"
-                  onClick={() => setMainImage(thumbnailSrc)}
-                />
-              );
-            })}
+            {Array.isArray(product.images) && product.images.length > 0 ? (
+              product.images.map((img, i) => {
+                const imageUrl = `${USER_BASE_URL}/${img}`;
+                // console.log(`Attempting to load image: ${imageUrl}`); // Debug log
+                return (
+                  <img
+                    key={i}
+                    src={imageUrl}
+                    alt={`Thumbnail ${i + 1}`}
+                    className="w-24 h-24 object-contain border rounded-lg mx-1 cursor-pointer hover:shadow"
+                    onClick={() => {
+                      // console.log(`Setting main image to: ${imageUrl}`); // Debug log
+                      setMainImage(imageUrl);
+                    }}
+                    onError={(e) => {
+                      // console.warn(`Failed to load image: ${imageUrl}`); // Debug log
+                      e.target.src = "/images/Product1.png"; // Fallback image
+                    }}
+                    loading="lazy" // Improve performance
+                  />
+                );
+              })
+            ) : (
+              <div className="text-gray-500">
+                No additional images available.
+              </div>
+            )}
           </div>
         </div>
 
         {/* Details */}
         <div className="w-full lg:w-3/5 space-y-4">
-          <h2 className="text-2xl md:text-3xl font-semibold">
-            Gold Infinity Ring 1
-          </h2>
+          <h2 className="text-2xl md:text-3xl font-semibold">{product.name}</h2>
 
           <div className="flex items-center gap-1 text-[#558AFF]">
-            {[1, 2, 3, 4].map((_, i) => (
-              <Star key={i} fill="currentColor" />
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                fill={i < product.rating ? "currentColor" : "none"}
+                className={i < product.rating ? "" : "text-gray-800"}
+              />
             ))}
-            <Star className="text-gray-800" />
-            <span className="ml-2 text-gray-600">42 Reviews</span>
+            <span className="ml-2 text-gray-600">
+              {product.reviewCount} Reviews
+            </span>
           </div>
 
           <p className="text-xl md:text-3xl font-bold text-gray-800">
-            ₹1,222.99
+            ₹{product.price.toFixed(2)}
           </p>
           <p className="text-lg md:text-xl text-gray-600">
-            Our premium eco-friendly multi-surface cleaner effectively removes
-            dirt, grime, and bacteria from all washable surfaces without harsh
-            chemicals. Safe for use around children and pets.
+            {product.description}
           </p>
 
           <ul className="text-gray-600 list-disc list-inside space-y-1">
-            <li>Free shipping on orders over $35</li>
-            <li>In stock: 35 units</li>
+            <li>Free shipping on orders over ₹1500</li>
+            <li>In stock: {product.stock} units</li>
           </ul>
 
           <div className="flex flex-col items-start gap-2">
@@ -146,7 +243,6 @@ const SingleProductPage = () => {
             >
               Add to Cart
             </Link>
-
             <Link
               to="/checkout"
               className="border border-[#558AFF] text-[#558AFF] px-4 py-2 md:py-3 rounded-md w-1/2 md:text-lg cursor-pointer text-center"
@@ -156,9 +252,11 @@ const SingleProductPage = () => {
           </div>
 
           <ul className="md:text-lg text-gray-500 list-disc list-inside space-y-1 mt-4">
-            <li>Plant-based ingredients</li>
-            <li>No harsh chemicals</li>
-            <li>Pleasant natural scent</li>
+            {Array.isArray(product.features) && product.features.length > 0 ? (
+              product.features.map((feature, i) => <li key={i}>{feature}</li>)
+            ) : (
+              <li>No features available.</li>
+            )}
           </ul>
         </div>
       </div>
@@ -189,108 +287,37 @@ const SingleProductPage = () => {
         <div className="transition-opacity duration-300 ease-in-out md:text-lg">
           {activeTab === "description" && (
             <div>
-              <p className="text-gray-700 py-3">
-                Our Multi-Surface Eco Cleaner is a versatile, powerful cleaning
-                solution designed to tackle dirt, grime, and bacteria on
-                virtually any washable surface in your home. Made with
-                plant-based ingredients, this eco-friendly formula effectively
-                cleans without harsh chemicals, making it safe for use around
-                children, pets, and those with sensitivities.
-              </p>
-
-              <p className="text-gray-700 py-3">
-                The biodegradable formula leaves no harmful residues and breaks
-                down naturally in the environment. With a pleasant, natural
-                lemon and eucalyptus scent derived from essential oils, it
-                leaves your home smelling fresh without artificial fragrances.
-              </p>
+              <p className="text-gray-700 py-3">{product.fullDescription}</p>
               <div className="py-3">
                 <span className="font-semibold text-xl">How to Use</span>
                 <ol className="text-gray-700 list-decimal pl-4 mt-2">
-                  <li>
-                    For general cleaning, spray directly onto the surface.
-                  </li>
-                  <li>
-                    Let sit for 30 seconds for tough stains or disinfecting.{" "}
-                  </li>
-                  <li>Wipe clean with a cloth or paper towel.</li>
-                  <li>No rinsing required for most surfaces.</li>
+                  {product.howToUse?.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
                 </ol>
               </div>
-
               <div className="py-3">
                 <span className="font-semibold text-xl">Suitable Surfaces</span>
-                <p className="text-gray-700 py-3">
-                  Countertops, sinks, stovetops, microwaves, refrigerators,
-                  bathroom fixtures, tile, sealed stone, glass, stainless steel,
-                  and most other washable surfaces. Not recommended for use on
-                  unsealed wood or natural marble.
-                </p>
+                <p className="text-gray-700 py-3">{product.suitableSurfaces}</p>
               </div>
             </div>
           )}
 
           {activeTab === "specification" && (
-            <div>
-              <div className="w-full">
-                <div className="grid grid-cols-2 text-sm md:text-lg text-gray-500 border-gray-200">
-                  {/* Row 1 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Volume
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    32 fl oz (946 ml)
-                  </div>
-
-                  {/* Row 2 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Ingredients
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    Water, Plant-Based Surfactants, Natural Fragrance, Citric
-                    Acid
-                  </div>
-
-                  {/* Row 3 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Scent
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    Lemon & Eucalyptus
-                  </div>
-
-                  {/* Row 4 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    pH Level
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    7.2 (Neutral)
-                  </div>
-
-                  {/* Row 5 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Shelf Life
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    24 months unopened, 12 months after opening
-                  </div>
-
-                  {/* Row 6 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Made In
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    INDIA
-                  </div>
-
-                  {/* Row 7 */}
-                  <div className="py-3 px-4 border-b border-gray-200  mr-4">
-                    Packaging
-                  </div>
-                  <div className="py-3 px-4 border-b border-gray-200">
-                    100% Recycled Plastic
-                  </div>
-                </div>
+            <div className="w-full">
+              <div className="grid grid-cols-2 text-sm md:text-lg text-gray-500 border-gray-200">
+                {Object.entries(product.specifications || {}).map(
+                  ([key, value], i) => (
+                    <React.Fragment key={i}>
+                      <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                        {key}
+                      </div>
+                      <div className="py-3 px-4 border-b border-gray-200">
+                        {value}
+                      </div>
+                    </React.Fragment>
+                  )
+                )}
               </div>
             </div>
           )}

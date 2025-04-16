@@ -1,43 +1,13 @@
-// import Header from "./components/Header";
-// import { BrowserRouter as Router } from "react-router-dom";
-// import Footer from "./components/Footer";
-// import CartPage from "./components/CartPage";
-// import WishlistPage from "./components/WishlistPage";
-// import SingleProductPage from "./components/SingleProductPage";
-// import AllProduct from "./components/AllProductPage";
-// import CombosPage from "./components/CombosPage";
-// import TrackOrderPage from "./components/TrackOrderPage";
-// import AboutUsPage from "./components/AboutUsPage";
-
-// function App() {
-//   return (
-//     <Router>
-//       {/* <Header /> */}
-
-//       {/* 09/04/2025 */}
-//       {/* <CartPage /> */}
-//       {/* <WishlistPage /> */}
-//       {/* <ContactUsPage /> */}
-
-//       {/* 10/04/2025 */}
-//       {/* <SingleProductPage/> */}
-//       {/* <AllProduct /> */}
-//       {/* <CombosPage /> */}
-//       {/* <TrackOrderPage /> */}
-//       {/* <AboutUsPage /> */}
-//       <Footer />
-//     </Router>
-//   );
-// }
-
-// export default App;
-
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
+import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
+
+// Components
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -54,25 +24,66 @@ import SignupPage from "./components/SignupPage";
 import SingleProductPage from "./components/SingleProductPage";
 import TrackOrderPage from "./components/TrackOrderPage";
 import WishlistPage from "./components/WishlistPage";
-import { useEffect } from "react";
 
-const AppContent = () => {
+// Admin Pages
+import AdminLayout from "./Admin/AdminLayout";
+import Dashboard from "./Admin/pages/Dashboard";
+import Products from "./Admin/pages/Products";
+import Services from "./Admin/pages/Services";
+import Blogs from "./Admin/pages/Categories";
+import Contact from "./Admin/pages/Contact";
+import Inquiries from "./Admin/pages/Inquiries";
+
+const PublicLayout = () => {
   const location = useLocation();
-
   const hideHeaderRoutes = ["/about", "/login", "/signup"];
   const hideFooterRoutes = ["/login", "/signup"];
 
   const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
   const shouldHideFooter = hideFooterRoutes.includes(location.pathname);
 
-  const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0); // Scrolls instantly to top-left
-  }, [pathname]);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <>
       {!shouldHideHeader && <Header />}
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3500,
+          className: "w-72",
+          style: {
+            background: "white",
+            color: "#1f2937",
+            padding: "14px 16px",
+            borderRadius: "0.5rem",
+            fontSize: "14px",
+            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+            borderLeft: "4px solid #3b82f6",
+          },
+          success: {
+            iconTheme: {
+              primary: "#10b981",
+              secondary: "#D1FAE5",
+            },
+            style: {
+              borderLeft: "4px solid #10b981",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#FEE2E2",
+            },
+            style: {
+              borderLeft: "4px solid #ef4444",
+            },
+          },
+        }}
+      />
 
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -97,7 +108,20 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        {/* Public Site Layout */}
+        <Route path="/*" element={<PublicLayout />} />
+
+        {/* Admin Panel Layout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="services" element={<Services />} />
+          <Route path="categories" element={<Blogs />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="inquiries" element={<Inquiries />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

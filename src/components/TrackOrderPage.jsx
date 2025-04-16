@@ -1,8 +1,26 @@
-import React, { useState } from "react";
-import { User, ClipboardList, Trash2, LogOut } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { User, ClipboardList, Trash2, LogOut, X } from "lucide-react";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 const TrackOrderPage = () => {
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+
   const [activeTab, setActiveTab] = useState("profile");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [userData, setUserData] = useState({
+    fullname: "",
+    username: "",
+    phone: "",
+    dob: "",
+    email: "",
+  });
+
+  const navigate = useNavigate();
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -14,6 +32,69 @@ const TrackOrderPage = () => {
       : "hover:bg-gray-100 text-black";
 
   const currentStep = 1;
+
+  useEffect(() => {
+    if (!token || !userId) {
+      navigate("/login");
+      return;
+    }
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(
+          `${USER_BASE_URL}/api/users/profile/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = response.data.user;
+
+        setUserData({
+          fullname: data.fullname || "",
+          username: data.username || "",
+          phone: data.phone || "",
+          dob: data.dob || "",
+          email: data.email || "",
+        });
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // 🧨 DELETE Account Function
+  const handleDeleteAccount = async () => {
+    try {
+      await axios.delete(`${USER_BASE_URL}/api/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Clear localStorage items
+      localStorage.clear();
+
+      // Notify user & redirect
+      toast.success("Account deleted successfully.");
+      setShowModal(false);
+      navigate("/signup");
+    } catch (err) {
+      toast.error("Failed to delete account.");
+      console.error(err);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    toast.success("Logged out successfully.");
+    setShowLogoutModal(false);
+    navigate("/login");
+  };
+
   return (
     <div className="container mx-auto px-2 md:px-4 lg:px-10 xl:px-8 py-12">
       <h1 className="text-2xl font-semibold mb-1">Track Your Order</h1>
@@ -28,10 +109,10 @@ const TrackOrderPage = () => {
               alt="Profile"
               className="w-18 h-18 rounded-full"
             />
-            <h2 className="font-medium text-2xl">Hii, Rahi</h2>
+            <h2 className="font-medium text-2xl">Hi, {userData.fullname}</h2>
           </div>
 
-          <div className="w-full space-y-1 ">
+          <div className="w-full space-y-1">
             <button
               onClick={() => handleTabClick("profile")}
               className={`flex items-center gap-6 w-full text-gray-500 px-5 py-3 rounded-md transition cursor-pointer ${isActive(
@@ -71,49 +152,53 @@ const TrackOrderPage = () => {
           </div>
         </div>
 
-        {/* Dynamic Content */}
+        {/* Right Side Content */}
         <div className="w-full md:w-2/3 lg:w-7/10 border border-gray-400 rounded-xl py-5 lg:py-10 px-3 md:px-4 lg:px-8 h-fit">
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block  mb-1">First Name</label>
+                <label className="block mb-1">Full Name</label>
                 <input
                   type="text"
-                  placeholder="Name"
-                  className="w-full border border-gray-400 rounded-md py-3 px-4"
+                  value={userData.fullname}
+                  readOnly
+                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
                 />
               </div>
               <div>
-                <label className="block  mb-1">Last Name</label>
+                <label className="block mb-1">Username</label>
                 <input
                   type="text"
-                  placeholder="Name"
-                  className="w-full border border-gray-400 rounded-md py-3 px-4"
+                  value={userData.username}
+                  readOnly
+                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
                 />
               </div>
               <div>
-                <label className="block  mb-1">Phone Number</label>
+                <label className="block mb-1">Phone Number</label>
                 <input
                   type="text"
-                  placeholder="Number"
-                  className="w-full border border-gray-400 rounded-md py-3 px-4"
+                  value={userData.phone}
+                  readOnly
+                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
                 />
               </div>
               <div>
-                <label className="block  mb-1">DOB</label>
+                <label className="block mb-1">DOB</label>
                 <input
                   type="text"
-                  placeholder="12/12/2006"
-                  className="w-full border border-gray-400 rounded-md py-3 px-4"
+                  value={userData.dob}
+                  readOnly
+                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
                 />
               </div>
               <div>
                 <label className="block mb-1">Email</label>
                 <input
                   type="email"
-                  value="adminadm123@gmail.com"
-                  disabled
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100 text-gray-600 cursor-not-allowed"
+                  value={userData.email}
+                  readOnly
+                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100 text-gray-600"
                 />
               </div>
             </div>
@@ -121,69 +206,8 @@ const TrackOrderPage = () => {
 
           {activeTab === "history" && (
             <div className="space-y-6">
-              {/* Stepper */}
-              <div className="relative flex justify-between items-center mb-10 md:px-4">
-                {/* Connecting background line */}
-                <div className="absolute top-4 left-[calc(12.5%+6px)] right-[calc(12.5%+6px)] h-0.5 bg-gray-300 z-0"></div>
-
-                {/* Progress line */}
-                <div
-                  className="absolute top-4 left-[calc(12.5%+2px)] h-0.5 bg-blue-500 z-10 transition-all duration-500"
-                  style={{ width: `calc(25% * ${currentStep - 1})` }}
-                ></div>
-
-                {/* Stepper circles */}
-                {["Ordered", "Shipping", "Out of delivery", "Delivered"].map(
-                  (step, index) => {
-                    const stepNumber = index + 1;
-                    const isCompleted = stepNumber < currentStep;
-                    const isCurrent = stepNumber === currentStep;
-
-                    return (
-                      <div
-                        key={index}
-                        className="flex flex-col items-center relative z-20 w-1/4"
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center border-2 text-sm font-bold transition-colors duration-300 ${
-                            isCompleted || isCurrent
-                              ? "bg-blue-500 text-white border-blue-500"
-                              : "bg-white text-gray-400 border-gray-300"
-                          }`}
-                        >
-                          {isCompleted || isCurrent ? "✓" : stepNumber}
-                        </div>
-                        <p className="text-sm mt-2 text-center">{step}</p>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-
-              {/* Order Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border border-gray-400 rounded-md p-4">
-                  <h4 className="font-medium">Delivery by Hari om Chemical</h4>
-                  <p className="text-sm text-gray-500">
-                    Tracking ID: 1234789412345689
-                  </p>
-                </div>
-                <div className="border border-gray-400 rounded-md p-4">
-                  <h4 className="font-medium">Shipping Address</h4>
-                  <p className="text-sm text-gray-500">
-                    123 Gold District New York, NY 10001
-                  </p>
-                </div>
-              </div>
-
-              {/* Product Image */}
-              <div>
-                <img
-                  src="/images/Product1.png"
-                  alt="Cleaning Products"
-                  className="rounded-md shadow"
-                />
-              </div>
+              {/* Sample order history UI */}
+              <p>Order tracking content here...</p>
             </div>
           )}
 
@@ -191,7 +215,10 @@ const TrackOrderPage = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4">Delete Account</h3>
               <p className="text-red-500">This action is irreversible.</p>
-              <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              <button
+                onClick={() => setShowModal(true)}
+                className="mt-4 bg-red-500 text-white px-4 py-2 rounded  cursor-pointer"
+              >
                 Delete My Account
               </button>
             </div>
@@ -201,13 +228,79 @@ const TrackOrderPage = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4">Log Out</h3>
               <p>Are you sure you want to log out?</p>
-              <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="mt-4 bg-[#558AFF] text-white px-4 py-2 rounded cursor-pointer"
+              >
                 Confirm Log Out
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* ✅ Delete Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-md max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Confirm Delete</h2>
+              <button onClick={() => setShowModal(false)}>
+                <X className="w-5 h-5 text-gray-600 cursor-pointer" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600">
+              Are you sure you want to delete your account? This action cannot
+              be undone.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 text-sm bg-gray-200 rounded cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded  cursor-pointer"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔒 Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-md max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Confirm Logout</h2>
+              <button onClick={() => setShowLogoutModal(false)}>
+                <X className="w-5 h-5 text-gray-600 cursor-pointer" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 text-sm bg-gray-200 rounded cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm bg-[#558AFF] text-white rounded cursor-pointer"
+              >
+                Yes, Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
