@@ -55,7 +55,7 @@ const PublicLayout = () => {
         position="top-right"
         toastOptions={{
           duration: 3500,
-          className: "w-72",
+          className: "w-76",
           style: {
             background: "white",
             color: "#1f2937",

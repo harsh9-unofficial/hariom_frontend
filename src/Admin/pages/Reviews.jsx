@@ -16,7 +16,6 @@ const Reviews = () => {
       setLoading(true);
       setError(null);
       const response = await axios.get(`${USER_BASE_URL}/api/ratings`);
-      console.log("Reviews data:", response.data);
       setReviews(response.data);
     } catch (err) {
       setError(
@@ -75,17 +74,6 @@ const Reviews = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          {/* <button
-            onClick={() => {
-              setCurrentReview(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <PlusIcon className="h-5 w-5" />
-            <span>Add Review</span>
-          </button> */}
         </div>
       </div>
 
@@ -148,15 +136,6 @@ const Reviews = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-center space-x-2">
-                      {/* <button
-                        onClick={() => {
-                          setCurrentReview(review);
-                          setIsModalOpen(true);
-                        }}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        <PencilSquareIcon className="h-5 w-5" />
-                      </button> */}
                       <button
                         onClick={() => handleDelete(review.id)}
                         className="text-red-600 hover:text-red-900"
@@ -171,13 +150,6 @@ const Reviews = () => {
           </table>
         </div>
       )}
-
-      {/* <ReviewModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        review={currentReview}
-        refreshReviews={fetchReviews}
-      /> */}
     </div>
   );
 };

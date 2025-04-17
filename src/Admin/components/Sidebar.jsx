@@ -14,10 +14,10 @@ import {
 const Sidebar = ({ onClose }) => {
   const navItems = [
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
-    { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
     { name: "Categories", path: "/admin/categories", icon: BookOpenIcon },
-    { name: "Reviews", path: "/admin/reviews", icon: CogIcon },
+    { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
     { name: "Users", path: "/admin/users", icon: ChatAltIcon },
+    { name: "Reviews", path: "/admin/reviews", icon: CogIcon },
     { name: "Contact", path: "/admin/contact", icon: ChatAltIcon },
     { name: "Inquiries", path: "/admin/inquiries", icon: InboxIcon },
   ];

@@ -6,12 +6,12 @@ import { toast } from "react-hot-toast";
 
 const Users = () => {
   const token = localStorage.getItem("token"); // Retrieve token from localStorage
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false); // Set to false since data is already available
+  const [users, setUsers] = useState([]); // Initialize as empty array
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch all users (can be kept for future API calls)
+  // Fetch all users
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -21,13 +21,18 @@ const Users = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Users data:", response.data);
-      setUsers(response.data.users); // Update to use response.data.users
+
+      // Ensure response.data.users exists, fallback to empty array
+      const fetchedUsers = Array.isArray(response.data.users)
+        ? response.data.users
+        : response.data || [];
+      setUsers(fetchedUsers);
     } catch (err) {
       setError(
         "Failed to load users: " + (err.response?.data?.message || err.message)
       );
       console.error("Error fetching users:", err);
+      toast.error("Error loading users");
     } finally {
       setLoading(false);
     }
@@ -50,7 +55,7 @@ const Users = () => {
           }
         );
         if (response.status === 200) {
-          fetchUsers();
+          fetchUsers(); // Refresh user list
           toast.success("User deleted successfully");
         } else {
           throw new Error(response.data.message || "Failed to delete user");
@@ -63,11 +68,12 @@ const Users = () => {
   };
 
   // Filter users based on search
-  const filteredUsers = users?.filter((user) =>
-    [user.fullName, user.email].some(
-      (field) => field && field.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredUsers =
+    users?.filter((user) =>
+      [user.fullName, user.email, user.username].some((field) =>
+        field?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    ) || []; // Fallback to empty array if filter result is undefined
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -93,6 +99,12 @@ const Users = () => {
       ) : error ? (
         <div className="text-center py-10">
           <p className="text-red-500 text-lg">{error}</p>
+          <button
+            onClick={fetchUsers}
+            className="mt-4 bg-[#558AFF] text-white px-6 py-2 rounded"
+          >
+            Retry
+          </button>
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="text-center py-10">
@@ -121,11 +133,11 @@ const Users = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers?.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {user.fullname || "N/A"}
+                      {user.fullName || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

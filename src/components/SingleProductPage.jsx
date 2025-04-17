@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom"; // Add useNavigate
 import axios from "axios";
 import { USER_BASE_URL } from "../config";
+import toast from "react-hot-toast";
 
 const SingleProductPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate(); // For redirecting after adding to cart
   const [activeTab, setActiveTab] = useState("description");
   const [mainImage, setMainImage] = useState("");
   const [product, setProduct] = useState(null);
@@ -14,15 +16,13 @@ const SingleProductPage = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
-  const [quantity, setQuantity] = useState(1); // State for quantity
-
-  // Modal State
+  const [quantity, setQuantity] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState("");
 
-  // Fetch product details
+  // Fetch product details (unchanged)
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -103,7 +103,7 @@ const SingleProductPage = () => {
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews
+  // Fetch reviews (unchanged)
   useEffect(() => {
     if (activeTab === "review") {
       const fetchReviews = async () => {
@@ -114,8 +114,6 @@ const SingleProductPage = () => {
             `${USER_BASE_URL}/api/ratings/products/${id}`
           );
           console.log("Reviews data:", response.data);
-
-          // Limit to latest 2 reviews
           const limitedReviews = response.data.slice(0, 2);
           setReviews(limitedReviews);
         } catch (err) {
@@ -132,6 +130,43 @@ const SingleProductPage = () => {
     }
   }, [activeTab, id]);
 
+  // Handle Add to Cart
+  const handleAddToCart = async () => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    if (!userId || !token) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${USER_BASE_URL}/api/cart/add`,
+        {
+          userId: parseInt(userId),
+          productId: parseInt(id),
+          quantity,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Add to cart response:", response.data);
+
+      // Show success toast
+      toast.success("Product added to cart successfully!");
+
+      // Redirect to cart page
+      navigate("/cart");
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to add to cart";
+      toast.error(errorMessage);
+      console.error("Add to cart error:", err.response?.data || err);
+    }
+  };
+
   const tabClass = (tab) =>
     `py-2 px-4 text-lg font-medium transition-colors duration-200 ease-in-out cursor-pointer ${
       activeTab === tab
@@ -141,8 +176,8 @@ const SingleProductPage = () => {
 
   const handleSave = async () => {
     if (rating > 0 && feedback.trim()) {
-      const userId = localStorage.getItem("userId"); // Replace with authentication context
-      const token = localStorage.getItem("token"); // Replace with authentication context
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
       if (!userId || !token) {
         setError("Please log in to submit a review.");
         return;
@@ -155,7 +190,7 @@ const SingleProductPage = () => {
             productId: id,
             userId,
             rating,
-            description: feedback, // Use 'description' to match the model
+            description: feedback,
           },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -164,7 +199,7 @@ const SingleProductPage = () => {
         console.log("Save review response:", response.data);
 
         const newReview = {
-          User: { fullName: "User" }, // Mock user name, replace with actual data
+          User: { fullName: "User" },
           rating,
           description: feedback,
           createdAt: new Date().toISOString(),
@@ -203,11 +238,9 @@ const SingleProductPage = () => {
       </span>
     ));
 
-  // Handle quantity changes
   const handleQuantityChange = (increment) => {
     setQuantity((prev) => {
       const newQuantity = prev + increment;
-      // Ensure quantity is between 1 and product stock
       if (newQuantity < 1) return 1;
       if (product && newQuantity > product.stock) return product.stock;
       return newQuantity;
@@ -325,12 +358,12 @@ const SingleProductPage = () => {
           </div>
 
           <div className="w-full flex gap-2">
-            <Link
-              to="/cart"
+            <button
+              onClick={handleAddToCart}
               className="w-1/2 bg-[#558AFF] text-white px-4 py-2 md:py-3 rounded-md md:text-lg cursor-pointer text-center"
             >
               Add to Cart
-            </Link>
+            </button>
             <Link
               to="/checkout"
               className="border border-[#558AFF] text-[#558AFF] px-4 py-2 md:py-3 rounded-md w-1/2 md:text-lg cursor-pointer text-center"
