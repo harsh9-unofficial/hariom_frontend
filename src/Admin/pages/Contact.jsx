@@ -13,6 +13,7 @@ import { USER_BASE_URL } from "../../config";
 import { toast } from "react-hot-toast";
 
 const Contact = () => {
+  const token = localStorage.getItem("token"); // Retrieve token from localStorage
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,10 +24,18 @@ const Contact = () => {
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${USER_BASE_URL}/contact/getall`);
-      setContacts(response.data);
+      const response = await axios.get(
+        `${USER_BASE_URL}/api/contacts/getContact`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setContacts(response.data); // Backend now returns array directly
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      toast.error("Failed to fetch contacts.");
     } finally {
       setLoading(false);
     }
@@ -36,26 +45,30 @@ const Contact = () => {
     fetchContacts();
   }, []);
 
-  const handleDelete = async (contactId) => {
+  const handleDelete = async (id) => {
     if (
       window.confirm("Are you sure you want to delete this contact request?")
     ) {
       try {
-        await axios.delete(`${USER_BASE_URL}/contact/remove/${contactId}`);
+        await axios.delete(`${USER_BASE_URL}/api/contacts/remove/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         fetchContacts();
         toast.success("Request Deleted...");
       } catch (error) {
-        toast.error("Error deleting Request ");
+        toast.error("Error deleting Request");
         console.error("Error deleting contact:", error);
       }
     }
   };
 
   // Toggle message expansion
-  const toggleExpandMessage = (contactId) => {
+  const toggleExpandMessage = (id) => {
     setExpandedMessages((prev) => ({
       ...prev,
-      [contactId]: !prev[contactId],
+      [id]: !prev[id],
     }));
   };
 
@@ -88,8 +101,8 @@ const Contact = () => {
   };
 
   // Message display with expand/collapse
-  const renderMessage = (message, contactId) => {
-    const isExpanded = expandedMessages[contactId];
+  const renderMessage = (message, id) => {
+    const isExpanded = expandedMessages[id];
     const displayMessage = isExpanded
       ? message
       : `${message.substring(0, 50)}${message.length > 50 ? "..." : ""}`;
@@ -105,7 +118,7 @@ const Contact = () => {
         </div>
         {message.length > 100 && (
           <button
-            onClick={() => toggleExpandMessage(contactId)}
+            onClick={() => toggleExpandMessage(id)}
             className="text-xs text-indigo-600 hover:text-indigo-800 mt-1 self-start"
           >
             {isExpanded ? "Show less" : "Show more"}
@@ -161,17 +174,16 @@ const Contact = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {currentItems.map((contact) => (
-                    <tr key={contact.contactId} className="hover:bg-gray-50">
+                    <tr key={contact.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <UserIcon className="flex-shrink-0 h-5 w-5 text-gray-400 mr-2" />
                           <div className="text-sm font-medium text-gray-900">
                             {contact.name}
                           </div>
@@ -179,7 +191,6 @@ const Contact = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <EnvelopeIcon className="flex-shrink-0 h-5 w-5 text-gray-400 mr-2" />
                           <div className="text-sm text-gray-500">
                             {contact.email}
                           </div>
@@ -187,16 +198,15 @@ const Contact = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-start">
-                          <ChatBubbleLeftIcon className="flex-shrink-0 h-5 w-5 text-gray-400 mr-2 mt-1" />
-                          {renderMessage(contact.message, contact.contactId)}
+                          {renderMessage(contact.message, contact.id)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(contact.createdAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <button
-                          onClick={() => handleDelete(contact.contactId)}
+                          onClick={() => handleDelete(contact.id)}
                           className="text-red-600 hover:text-red-900"
                           title="Delete"
                         >

@@ -5,32 +5,22 @@ import axios from "axios";
 import { USER_BASE_URL } from "../config";
 
 const SingleProductPage = () => {
-  const { id } = useParams(); // Get product ID from URL
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("description");
   const [mainImage, setMainImage] = useState("");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [quantity, setQuantity] = useState(1); // State for quantity
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState("");
-  const [reviews, setReviews] = useState([
-    {
-      name: "Sarah J.",
-      rating: 4,
-      text: "This cleaner is amazing! It cleaned my kitchen counters better than any other product I've tried, and I love that it's eco-friendly. The scent is pleasant but not overwhelming.",
-      time: "2 Month ago",
-    },
-    {
-      name: "Michael T.",
-      rating: 4,
-      text: "I've been using this on almost everything in my house. Works great on counters, sinks, and tables. Struggled a bit with really tough grease stains, but overall very happy with it.",
-      time: "2 Month ago",
-    },
-  ]);
 
   // Fetch product details
   useEffect(() => {
@@ -39,24 +29,18 @@ const SingleProductPage = () => {
         setLoading(true);
         const response = await axios.get(`${USER_BASE_URL}/api/products/${id}`);
         console.log("Product data:", response.data);
-        console.log("Images raw:", response.data.images);
-        console.log("Images type:", typeof response.data.images);
 
-        // Normalize images
         let images = response.data.images;
         if (typeof images === "string") {
           try {
-            images = JSON.parse(images); // Parse stringified JSON array
-            console.log("Parsed images:", images);
+            images = JSON.parse(images);
           } catch (e) {
             console.error("Error parsing images:", e);
             images = [];
           }
         }
         images = Array.isArray(images) ? images : images ? [images] : [];
-        console.log("Normalized images:", images);
 
-        // Normalize features
         let features = response.data.features;
         if (typeof features === "string") {
           try {
@@ -72,25 +56,44 @@ const SingleProductPage = () => {
           ? [features]
           : [];
 
+        let howToUse = response.data.howToUse;
+        if (typeof howToUse === "string") {
+          try {
+            howToUse = JSON.parse(howToUse.replace(/'/g, '"'));
+          } catch (e) {
+            console.error("Error parsing howToUse:", e);
+            howToUse = [];
+          }
+        }
+        howToUse = Array.isArray(howToUse)
+          ? howToUse
+          : howToUse
+          ? [howToUse]
+          : [];
+
         const normalizedProduct = {
           ...response.data,
           images,
           features,
+          howToUse,
+          shortDescription: response.data.shortDescription || "",
+          longDescription: response.data.longDescription || "",
+          averageRatings: response.data.averageRatings || 0,
+          totalReviews: response.data.totalReviews || 0,
         };
-        console.log("Final normalized product:", normalizedProduct);
 
-        // Remove duplicates from features
         normalizedProduct.features = [...new Set(normalizedProduct.features)];
         setProduct(normalizedProduct);
 
-        // Set main image
         const firstImage = normalizedProduct.images[0]
           ? `${USER_BASE_URL}/${normalizedProduct.images[0]}`
           : "/images/Product1.png";
-        console.log("Setting main image to:", firstImage);
         setMainImage(firstImage);
       } catch (err) {
-        setError("Failed to load product data.");
+        setError(
+          "Failed to load product data: " +
+            (err.response?.data?.message || err.message)
+        );
         console.error("Fetch error:", err);
       } finally {
         setLoading(false);
@@ -100,6 +103,35 @@ const SingleProductPage = () => {
     fetchProduct();
   }, [id]);
 
+  // Fetch reviews
+  useEffect(() => {
+    if (activeTab === "review") {
+      const fetchReviews = async () => {
+        try {
+          setReviewsLoading(true);
+          setReviewsError(null);
+          const response = await axios.get(
+            `${USER_BASE_URL}/api/ratings/products/${id}`
+          );
+          console.log("Reviews data:", response.data);
+
+          // Limit to latest 2 reviews
+          const limitedReviews = response.data.slice(0, 2);
+          setReviews(limitedReviews);
+        } catch (err) {
+          setReviewsError(
+            "Failed to load reviews: " +
+              (err.response?.data?.message || err.message)
+          );
+          console.error("Fetch reviews error:", err);
+        } finally {
+          setReviewsLoading(false);
+        }
+      };
+      fetchReviews();
+    }
+  }, [activeTab, id]);
+
   const tabClass = (tab) =>
     `py-2 px-4 text-lg font-medium transition-colors duration-200 ease-in-out cursor-pointer ${
       activeTab === tab
@@ -107,18 +139,52 @@ const SingleProductPage = () => {
         : "text-gray-600 hover:text-[#558AFF]"
     }`;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (rating > 0 && feedback.trim()) {
-      const newReview = {
-        name: "You",
-        rating,
-        text: feedback,
-        time: "Just now",
-      };
-      setReviews([newReview, ...reviews]);
-      setShowModal(false);
-      setRating(0);
-      setFeedback("");
+      const userId = localStorage.getItem("userId"); // Replace with authentication context
+      const token = localStorage.getItem("token"); // Replace with authentication context
+      if (!userId || !token) {
+        setError("Please log in to submit a review.");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          `${USER_BASE_URL}/api/ratings`,
+          {
+            productId: id,
+            userId,
+            rating,
+            description: feedback, // Use 'description' to match the model
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log("Save review response:", response.data);
+
+        const newReview = {
+          User: { fullName: "User" }, // Mock user name, replace with actual data
+          rating,
+          description: feedback,
+          createdAt: new Date().toISOString(),
+        };
+        setReviews([newReview, ...reviews]);
+        setProduct((prev) => ({
+          ...prev,
+          averageRatings: response.data.averageRatings || prev.averageRatings,
+          totalReviews: response.data.totalReviews || prev.totalReviews,
+        }));
+        setShowModal(false);
+        setRating(0);
+        setFeedback("");
+      } catch (err) {
+        setError(
+          "Failed to submit review: " +
+            (err.response?.data?.message || err.message)
+        );
+        console.error("Save review error:", err.response?.data || err);
+      }
     }
   };
 
@@ -137,20 +203,29 @@ const SingleProductPage = () => {
       </span>
     ));
 
+  // Handle quantity changes
+  const handleQuantityChange = (increment) => {
+    setQuantity((prev) => {
+      const newQuantity = prev + increment;
+      // Ensure quantity is between 1 and product stock
+      if (newQuantity < 1) return 1;
+      if (product && newQuantity > product.stock) return product.stock;
+      return newQuantity;
+    });
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   if (!product) return <div>Product not found.</div>;
 
   return (
     <div className="py-12 px-2 md:px-4 lg:px-10 xl:px-8 container mx-auto">
-      {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-4">
         Home / Product /{" "}
         <span className="text-gray-900 font-medium">{product.name}</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
-        {/* Images */}
         <div className="flex flex-col gap-4 w-full lg:w-2/5">
           <div className="rounded-2xl">
             <img
@@ -158,30 +233,26 @@ const SingleProductPage = () => {
               alt={product.name}
               className="rounded-xl w-full object-contain"
               onError={(e) => {
-                e.target.src = "/images/Product1.png"; // Fallback image
+                e.target.src = "/images/Product1.png";
               }}
             />
           </div>
-          <div className="grid grid-cols-4 gap-2">
+
+          <div className="grid grid-cols-5 gap-2">
             {Array.isArray(product.images) && product.images.length > 0 ? (
               product.images.map((img, i) => {
                 const imageUrl = `${USER_BASE_URL}/${img}`;
-                // console.log(`Attempting to load image: ${imageUrl}`); // Debug log
                 return (
                   <img
                     key={i}
                     src={imageUrl}
                     alt={`Thumbnail ${i + 1}`}
-                    className="w-24 h-24 object-contain border rounded-lg mx-1 cursor-pointer hover:shadow"
-                    onClick={() => {
-                      // console.log(`Setting main image to: ${imageUrl}`); // Debug log
-                      setMainImage(imageUrl);
-                    }}
+                    className="w-28 border rounded-lg mx-1 cursor-pointer hover:shadow"
+                    onClick={() => setMainImage(imageUrl)}
                     onError={(e) => {
-                      // console.warn(`Failed to load image: ${imageUrl}`); // Debug log
-                      e.target.src = "/images/Product1.png"; // Fallback image
+                      e.target.src = "/images/Product1.png";
                     }}
-                    loading="lazy" // Improve performance
+                    loading="lazy"
                   />
                 );
               })
@@ -193,7 +264,6 @@ const SingleProductPage = () => {
           </div>
         </div>
 
-        {/* Details */}
         <div className="w-full lg:w-3/5 space-y-4">
           <h2 className="text-2xl md:text-3xl font-semibold">{product.name}</h2>
 
@@ -201,12 +271,18 @@ const SingleProductPage = () => {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                fill={i < product.rating ? "currentColor" : "none"}
-                className={i < product.rating ? "" : "text-gray-800"}
+                fill={
+                  i < Math.round(product.averageRatings)
+                    ? "currentColor"
+                    : "none"
+                }
+                className={
+                  i < Math.round(product.averageRatings) ? "" : "text-gray-800"
+                }
               />
             ))}
             <span className="ml-2 text-gray-600">
-              {product.reviewCount} Reviews
+              {product.totalReviews} Reviews
             </span>
           </div>
 
@@ -214,7 +290,7 @@ const SingleProductPage = () => {
             ₹{product.price.toFixed(2)}
           </p>
           <p className="text-lg md:text-xl text-gray-600">
-            {product.description}
+            {product.shortDescription}
           </p>
 
           <ul className="text-gray-600 list-disc list-inside space-y-1">
@@ -225,14 +301,26 @@ const SingleProductPage = () => {
           <div className="flex flex-col items-start gap-2">
             <span className="font-semibold text-lg md:text-xl">Quantity</span>
             <div className="flex items-center border rounded-md overflow-hidden">
-              <button className="px-3 py-1">-</button>
+              <button
+                className="px-3 py-2 disabled:opacity-50 cursor-pointer"
+                onClick={() => handleQuantityChange(-1)}
+                disabled={quantity <= 1}
+              >
+                -
+              </button>
               <input
                 type="text"
-                value="1"
+                value={quantity}
                 readOnly
                 className="w-12 text-center border-l border-r"
               />
-              <button className="px-3 py-1">+</button>
+              <button
+                className="px-3 py-2 disabled:opacity-50 cursor-pointer"
+                onClick={() => handleQuantityChange(1)}
+                disabled={quantity >= product.stock}
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -261,7 +349,6 @@ const SingleProductPage = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="mt-12">
         <div className="flex md:space-x-4 border-b border-gray-200 mb-4">
           <button
@@ -280,20 +367,19 @@ const SingleProductPage = () => {
             className={`${tabClass("review")} text-sm md:text-lg`}
             onClick={() => setActiveTab("review")}
           >
-            Reviews
+            Reviews ({product.totalReviews})
           </button>
         </div>
 
         <div className="transition-opacity duration-300 ease-in-out md:text-lg">
           {activeTab === "description" && (
             <div>
-              <p className="text-gray-700 py-3">{product.fullDescription}</p>
+              <p className="text-gray-700 py-3">{product.longDescription}</p>
               <div className="py-3">
                 <span className="font-semibold text-xl">How to Use</span>
                 <ol className="text-gray-700 list-decimal pl-4 mt-2">
-                  {product.howToUse?.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
+                  {Array.isArray(product.howToUse) &&
+                    product.howToUse.map((step, i) => <li key={i}>{step}</li>)}
                 </ol>
               </div>
               <div className="py-3">
@@ -306,18 +392,48 @@ const SingleProductPage = () => {
           {activeTab === "specification" && (
             <div className="w-full">
               <div className="grid grid-cols-2 text-sm md:text-lg text-gray-500 border-gray-200">
-                {Object.entries(product.specifications || {}).map(
-                  ([key, value], i) => (
-                    <React.Fragment key={i}>
-                      <div className="py-3 px-4 border-b border-gray-200 mr-4">
-                        {key}
-                      </div>
-                      <div className="py-3 px-4 border-b border-gray-200">
-                        {value}
-                      </div>
-                    </React.Fragment>
-                  )
-                )}
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Volume
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.volume || "N/A"}
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Ingredients
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.ingredients || "N/A"}
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Scent
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.scent || "N/A"}
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  pH Level
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.phLevel || "N/A"}
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Shelf Life
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.shelfLife || "N/A"} months
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Made In
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.madeIn || "N/A"}
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200 mr-4">
+                  Packaging
+                </div>
+                <div className="py-3 px-4 border-b border-gray-200">
+                  {product.packaging || "N/A"}
+                </div>
               </div>
             </div>
           )}
@@ -333,38 +449,45 @@ const SingleProductPage = () => {
                 </button>
               </div>
 
-              {reviews.map((review, i) => (
-                <div key={i}>
-                  <div className="flex justify-between">
-                    <div className="font-semibold text-xl md:text-3xl">
-                      {review.name}
+              {Array.isArray(reviews) && reviews.length > 0 ? (
+                reviews.map((review, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between">
+                      <div className="font-semibold text-xl md:text-3xl">
+                        {review.User?.fullName || "Anonymous"}
+                      </div>
+                      <div className="text-gray-500 mt-1">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
-                    <div className="text-gray-500 mt-1">{review.time}</div>
+                    <div className="flex items-center space-x-1 text-[#558AFF] md:text-2xl">
+                      {[...Array(5)].map((_, idx) => (
+                        <span
+                          key={idx}
+                          className={
+                            idx < Math.round(review.rating)
+                              ? "text-[#558AFF]"
+                              : "text-gray-300"
+                          }
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <p className="md:text-xl text-gray-700 mt-1">
+                      {review.description}
+                    </p>
+                    <hr className="border-t border-gray-200 mt-4" />
                   </div>
-                  <div className="flex items-center space-x-1 text-[#558AFF] md:text-2xl">
-                    {[...Array(5)].map((_, idx) => (
-                      <span
-                        key={idx}
-                        className={
-                          idx < review.rating
-                            ? "text-[#558AFF]"
-                            : "text-gray-300"
-                        }
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <p className="md:text-xl text-gray-700 mt-1">{review.text}</p>
-                  <hr className="border-t border-gray-200 mt-4" />
-                </div>
-              ))}
+                ))
+              ) : (
+                <div>No reviews yet.</div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Review Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
           <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl animate-fade-in">

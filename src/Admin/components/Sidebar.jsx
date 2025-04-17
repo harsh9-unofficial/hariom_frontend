@@ -16,7 +16,8 @@ const Sidebar = ({ onClose }) => {
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
     { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
     { name: "Categories", path: "/admin/categories", icon: BookOpenIcon },
-    { name: "Services", path: "/admin/services", icon: CogIcon },
+    { name: "Reviews", path: "/admin/reviews", icon: CogIcon },
+    { name: "Users", path: "/admin/users", icon: ChatAltIcon },
     { name: "Contact", path: "/admin/contact", icon: ChatAltIcon },
     { name: "Inquiries", path: "/admin/inquiries", icon: InboxIcon },
   ];

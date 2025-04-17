@@ -26,7 +26,7 @@ const Products = () => {
       const response = await axios.get(`${USER_BASE_URL}/api/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Fetched products:", response.data);
+      // console.log("Fetched products:", response.data);
 
       // Parse images field if it's a JSON string
       const parsedProducts = response.data.map((product) => ({
@@ -174,9 +174,9 @@ const Products = () => {
                       {product.category || "-"}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-4">
                     <div className="text-sm text-gray-500 line-clamp-2">
-                      {product.description}
+                      {product.shortDescription}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

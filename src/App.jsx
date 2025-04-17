@@ -29,10 +29,11 @@ import WishlistPage from "./components/WishlistPage";
 import AdminLayout from "./Admin/AdminLayout";
 import Dashboard from "./Admin/pages/Dashboard";
 import Products from "./Admin/pages/Products";
-import Services from "./Admin/pages/Services";
 import Blogs from "./Admin/pages/Categories";
 import Contact from "./Admin/pages/Contact";
 import Inquiries from "./Admin/pages/Inquiries";
+import Reviews from "./Admin/pages/Reviews";
+import Users from "./Admin/pages/Users";
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -116,8 +117,9 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
-          <Route path="services" element={<Services />} />
+          <Route path="reviews" element={<Reviews />} />
           <Route path="categories" element={<Blogs />} />
+          <Route path="users" element={<Users />} />
           <Route path="contact" element={<Contact />} />
           <Route path="inquiries" element={<Inquiries />} />
         </Route>
