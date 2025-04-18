@@ -70,7 +70,7 @@ const Users = () => {
   // Filter users based on search
   const filteredUsers =
     users?.filter((user) =>
-      [user.fullName, user.email, user.username].some((field) =>
+      [user.fullname, user.email, user.username].some((field) =>
         field?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     ) || []; // Fallback to empty array if filter result is undefined
@@ -137,7 +137,7 @@ const Users = () => {
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {user.fullName || "N/A"}
+                      {user.fullname || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Trash2, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { USER_BASE_URL } from "../config";
 
 function EmptyCart() {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-20 gap-5">
+    <div className="flex flex-col items-center justify-center text-center py-45 gap-5">
       <h2 className="text-xl font-semibold mb-2">
         Your Cart is Currently Empty.
       </h2>
@@ -20,25 +20,40 @@ function EmptyCart() {
   );
 }
 
+function ErrorDisplay() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-45 gap-5">
+      <h2 className="text-xl font-semibold mb-2">
+        Please log in to view your Cart.
+      </h2>
+      <Link to="/login">
+        <button className="bg-[#558AFF] text-white px-6 py-2 rounded cursor-pointer transition">
+          Log In
+        </button>
+      </Link>
+    </div>
+  );
+}
+
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
   const fetchCartItems = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${USER_BASE_URL}/api/cart/get/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // console.log(response.data);
-
+      console.log("Fetched cart items:", response.data);
       setCartItems(response.data);
     } catch (err) {
       setError("Failed to fetch cart items");
@@ -49,13 +64,15 @@ export default function CartPage() {
   };
 
   useEffect(() => {
-    fetchCartItems();
-  }, []);
+    if (userId && token) {
+      fetchCartItems();
+    } else {
+      setError("Please log in to view your Cart");
+      setLoading(false);
+    }
+  }, [userId, token]);
 
   const incrementQuantity = async (cartId) => {
-    // console.log(cartId);
-
-    // Find the item in cartItems
     const item = cartItems.find((item) => item.cartId === cartId);
     if (!item) {
       toast.error("Item not found in cart");
@@ -63,15 +80,13 @@ export default function CartPage() {
     }
 
     try {
-      const token = localStorage.getItem("token");
       await axios.put(
         `${USER_BASE_URL}/api/cart/update/${cartId}`,
-        { quantity: item.quantity + 1 }, // Send the incremented quantity
+        { quantity: item.quantity + 1 },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // Update frontend state
       setCartItems((prev) =>
         prev.map((item) =>
           item.cartId === cartId
@@ -81,7 +96,7 @@ export default function CartPage() {
       );
       toast.success("Quantity updated");
     } catch (err) {
-      console.error(err.response?.data || err.message); // Log detailed error
+      console.error(err.response?.data || err.message);
       toast.error("Error updating quantity");
     }
   };
@@ -91,7 +106,6 @@ export default function CartPage() {
     if (!item || item.quantity <= 1) return;
 
     try {
-      const token = localStorage.getItem("token");
       await axios.put(
         `${USER_BASE_URL}/api/cart/update/${cartId}`,
         { quantity: item.quantity - 1 },
@@ -114,16 +128,40 @@ export default function CartPage() {
 
   const removeItem = async (cartId) => {
     try {
-      const token = localStorage.getItem("token");
       await axios.delete(`${USER_BASE_URL}/api/cart/remove/${cartId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCartItems((prev) => prev.filter((item) => item.id !== cartId));
+      setCartItems((prev) => prev.filter((item) => item.cartId !== cartId));
       fetchCartItems();
       toast.success("Item removed from cart");
     } catch (err) {
       toast.error("Error removing item");
     }
+  };
+
+  const handleCheckout = () => {
+    if (!token) {
+      toast.error("Please log in to proceed to checkout.");
+      return;
+    }
+
+    if (!cartItems || cartItems.length === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+
+    // Format cart items to match the structure expected by checkout (like SingleProductPage)
+    const checkoutData = cartItems.map((item) => ({
+      id: item.Product.id,
+      name: item.Product.name,
+      price: item.Product.price,
+      images: item.Product.images, // Ensure images is an array
+      quantity: item.quantity,
+    }));
+
+    console.log("Navigating to checkout with cart items:", cartItems);
+    navigate("/checkout", { state: { cartItems } }); // Pass as { product: checkoutData }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const subtotal = cartItems.reduce(
@@ -140,6 +178,11 @@ export default function CartPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#558AFF]"></div>
       </div>
     );
+
+  if (error === "Please log in to view your Cart") {
+    return <ErrorDisplay />;
+  }
+
   if (error)
     return (
       <div className="text-center py-10">
@@ -162,7 +205,6 @@ export default function CartPage() {
         <EmptyCart />
       ) : (
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Cart Items */}
           <div className="flex-1">
             <div className="hidden lg:grid grid-cols-7 gap-4 font-medium border-b border-gray-300 pb-4 text-lg text-gray-600 text-center">
               <div>Product</div>
@@ -174,20 +216,22 @@ export default function CartPage() {
             </div>
 
             {cartItems.map((item) => (
-              <div key={item.id} className="border-b border-gray-300 py-4">
+              <div key={item.cartId} className="border-b border-gray-300 py-4">
                 <div className="hidden md:grid grid-cols-7 lg:gap-4 items-center text-center md:text-left">
                   <div className="flex justify-center md:justify-start">
                     <img
-                      src={`${USER_BASE_URL}/${item.Product.images[0]}`} // Use the first image URL
+                      src={
+                        item.Product.images && item.Product.images[0]
+                          ? `${USER_BASE_URL}/${item.Product.images[0]}`
+                          : "/images/Product9.png"
+                      }
                       alt={item.Product.name}
                       className="h-28 w-28 object-cover rounded"
                     />
                   </div>
                   <div className="md:col-span-2 md:pl-3 lg:pl-0">
                     <p className="font-medium text-lg">{item.Product.name}</p>
-                    <p className="text-gray-500 text-sm">
-                      Quantity: {item.Product.size}
-                    </p>
+                    <p className="text-gray-500 text-sm">Quantity: 100ml</p>
                   </div>
                   <div className="flex justify-center md:justify-start lg:justify-center items-center">
                     <div className="flex items-center border border-gray-300 rounded overflow-hidden">
@@ -224,7 +268,6 @@ export default function CartPage() {
                     />
                   </div>
                 </div>
-                {/* Mobile layout remains similar, adjust as needed */}
               </div>
             ))}
 
@@ -238,7 +281,6 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="w-full lg:w-[25%] h-fit border border-gray-300 rounded-lg p-6 space-y-6 mt-4 lg:mt-0">
             <h3 className="text-xl font-semibold">Order Summary</h3>
             <div className="space-y-2 text-gray-600 border-b border-gray-200 pb-4">
@@ -259,11 +301,12 @@ export default function CartPage() {
               <span>Total</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
-            <Link to="/checkout">
-              <button className="w-full bg-[#558AFF] text-white py-3 rounded text-center cursor-pointer transition">
-                Proceed to Checkout
-              </button>
-            </Link>
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-[#558AFF] text-white py-3 rounded text-center cursor-pointer transition hover:bg-[#4472cc]"
+            >
+              Proceed to Checkout
+            </button>
           </div>
         </div>
       )}

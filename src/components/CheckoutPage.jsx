@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { USER_BASE_URL } from "../config";
 
 const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const location = useLocation();
 
   // Example product data
   const products = [
@@ -9,13 +12,25 @@ const CheckoutPage = () => {
     { id: 2, name: "Nourishing Face Cream", price: 200, quantity: 1 },
   ];
 
+  const { cartItems } = location.state || {
+    cartItems: [],
+  };
+
+  console.log(cartItems);
+
+  const directProduct = location.state?.product || null;
+  const finalCartItems = directProduct
+    ? [{ ...directProduct, quantity: 1 }]
+    : cartItems;
+
+  console.log("cartitemms", finalCartItems);
   // Calculate subtotal, shipping, tax, and total
   const subtotal = products.reduce(
     (acc, product) => acc + product.price * product.quantity,
     0
   );
   const shipping = 20; // Flat shipping cost
-  const tax = (subtotal * 0.1).toFixed(2); // Tax as 10% of subtotal
+  const tax = 20; // Tax as 10% of subtotal
   const total = (
     parseFloat(subtotal) +
     parseFloat(shipping) +
@@ -209,27 +224,33 @@ const CheckoutPage = () => {
         <div className="border border-gray-300 p-3 rounded-lg h-fit bg-white">
           <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
           <div className="space-y-4">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="flex justify-between items-center"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/images/Product1.png"
-                    className="w-14 h-14 rounded-md"
-                    alt="Product"
-                  />
-                  <div>
-                    <p className="text-md font-medium">{product.name}</p>
-                    <p className="text-sm text-gray-500">
-                      Qty: {product.quantity}
-                    </p>
+            {finalCartItems?.map((item) => {
+              const product = item.Product || item; // Use item.Product if it exists
+              {
+                console.log(`${USER_BASE_URL}/${product.images?.[0]}`);
+              }
+              return (
+                <div
+                  key={item.productId} // Use productId from the outer item object
+                  className="flex justify-between items-center"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={`${USER_BASE_URL}/${product.images?.[0]}`}
+                      className="w-14 h-14 rounded-md"
+                      alt={product.name}
+                    />
+                    <div>
+                      <p className="text-md font-medium">{product.name}</p>
+                      <p className="text-sm text-gray-500">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
                   </div>
+                  <p className="text-md font-medium">₹{product.price}</p>
                 </div>
-                <p className="text-md font-medium">₹{product.price}</p>
-              </div>
-            ))}
+              );
+            })}
             <div className="border-t border-gray-300 pt-4 space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>

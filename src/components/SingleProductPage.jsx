@@ -1,34 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { Link, useParams, useNavigate } from "react-router-dom"; // Add useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { USER_BASE_URL } from "../config";
 import toast from "react-hot-toast";
 
 const SingleProductPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate(); // For redirecting after adding to cart
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("description");
   const [mainImage, setMainImage] = useState("");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [reviewsError, setReviewsError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState("");
 
-  // Fetch product details (unchanged)
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
         const response = await axios.get(`${USER_BASE_URL}/api/products/${id}`);
-        console.log("Product data:", response.data);
+        console.log("Fetched product data:", response.data);
 
         let images = response.data.images;
         if (typeof images === "string") {
@@ -47,7 +44,11 @@ const SingleProductPage = () => {
             features = JSON.parse(features.replace(/'/g, '"'));
           } catch (e) {
             console.error("Error parsing features:", e);
-            features = [];
+            features = features
+              ? features
+                  .split(",")
+                  .map((item) => item.trim().replace(/^'|'$/g, ""))
+              : [];
           }
         }
         features = Array.isArray(features)
@@ -62,7 +63,11 @@ const SingleProductPage = () => {
             howToUse = JSON.parse(howToUse.replace(/'/g, '"'));
           } catch (e) {
             console.error("Error parsing howToUse:", e);
-            howToUse = [];
+            howToUse = howToUse
+              ? howToUse
+                  .split(",")
+                  .map((item) => item.trim().replace(/^'|'$/g, ""))
+              : [];
           }
         }
         howToUse = Array.isArray(howToUse)
@@ -103,34 +108,24 @@ const SingleProductPage = () => {
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews (unchanged)
   useEffect(() => {
     if (activeTab === "review") {
       const fetchReviews = async () => {
         try {
-          setReviewsLoading(true);
-          setReviewsError(null);
           const response = await axios.get(
             `${USER_BASE_URL}/api/ratings/products/${id}`
           );
           console.log("Reviews data:", response.data);
-          const limitedReviews = response.data.slice(0, 2);
-          setReviews(limitedReviews);
+          setReviews(response.data.slice(0, 2));
         } catch (err) {
-          setReviewsError(
-            "Failed to load reviews: " +
-              (err.response?.data?.message || err.message)
-          );
           console.error("Fetch reviews error:", err);
-        } finally {
-          setReviewsLoading(false);
+          toast.error("Failed to load reviews.");
         }
       };
       fetchReviews();
     }
   }, [activeTab, id]);
 
-  // Handle Add to Cart
   const handleAddToCart = async () => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
@@ -141,7 +136,7 @@ const SingleProductPage = () => {
     }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${USER_BASE_URL}/api/cart/add`,
         {
           userId: parseInt(userId),
@@ -152,19 +147,41 @@ const SingleProductPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Add to cart response:", response.data);
-
-      // Show success toast
       toast.success("Product added to cart successfully!");
-
-      // Redirect to cart page
       navigate("/cart");
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Failed to add to cart";
-      toast.error(errorMessage);
-      console.error("Add to cart error:", err.response?.data || err);
+      toast.error(err.response?.data?.message || "Failed to add to cart");
     }
+  };
+
+  const handleCheckout = () => {
+    const token = localStorage.getItem("token");
+    console.log("Token:", token);
+
+    if (!token) {
+      toast.error("Please log in to proceed to checkout.");
+      return;
+    }
+
+    if (!product || !product.id) {
+      console.error("Product data is invalid or missing:", product);
+      toast.error("Product data is unavailable. Please try again.");
+      return;
+    }
+
+    // const checkoutData = {
+    //   id: product.id,
+    //   name: product.name,
+    //   price: product.price,
+    //   images: product.images,
+    //   quantity,
+    // };
+
+    console.log("Navigating to checkout with product:", product);
+    navigate("/checkout", {
+      state: { product: { ...product, quantity } },
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const tabClass = (tab) =>
@@ -179,7 +196,7 @@ const SingleProductPage = () => {
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
       if (!userId || !token) {
-        setError("Please log in to submit a review.");
+        toast.error("Please log in to submit a review.");
         return;
       }
 
@@ -196,15 +213,15 @@ const SingleProductPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("Save review response:", response.data);
-
-        const newReview = {
-          User: { fullName: "User" },
-          rating,
-          description: feedback,
-          createdAt: new Date().toISOString(),
-        };
-        setReviews([newReview, ...reviews]);
+        setReviews([
+          {
+            User: { fullName: "User" },
+            rating,
+            description: feedback,
+            createdAt: new Date().toISOString(),
+          },
+          ...reviews,
+        ]);
         setProduct((prev) => ({
           ...prev,
           averageRatings: response.data.averageRatings || prev.averageRatings,
@@ -213,13 +230,12 @@ const SingleProductPage = () => {
         setShowModal(false);
         setRating(0);
         setFeedback("");
+        toast.success("Review submitted successfully!");
       } catch (err) {
-        setError(
-          "Failed to submit review: " +
-            (err.response?.data?.message || err.message)
-        );
-        console.error("Save review error:", err.response?.data || err);
+        toast.error("Failed to submit review.");
       }
+    } else {
+      toast.error("Please provide a rating and feedback.");
     }
   };
 
@@ -364,12 +380,12 @@ const SingleProductPage = () => {
             >
               Add to Cart
             </button>
-            <Link
-              to="/checkout"
+            <button
+              onClick={handleCheckout}
               className="border border-[#558AFF] text-[#558AFF] px-4 py-2 md:py-3 rounded-md w-1/2 md:text-lg cursor-pointer text-center"
             >
               Buy Now
-            </Link>
+            </button>
           </div>
 
           <ul className="md:text-lg text-gray-500 list-disc list-inside space-y-1 mt-4">

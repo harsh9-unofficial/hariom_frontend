@@ -1,127 +1,113 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PiShoppingCart } from "react-icons/pi";
 import { GoHeart } from "react-icons/go";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
-// Product List (2–3 per category)
-const products = [
-  // Kitchen Cleaners
-  {
-    id: 1,
-    name: "Multi-Surface Eco Cleaner",
-    price: 1299,
-    rating: 5,
-    category: "Kitchen Cleaners",
-    image: "/images/Product1.png",
-  },
-  {
-    id: 2,
-    name: "Grease Buster Gel",
-    price: 899,
-    rating: 4,
-    category: "Kitchen Cleaners",
-    image: "/images/Product1.png",
-  },
-
-  // Bathroom Cleaners
-  {
-    id: 3,
-    name: "Bathroom Sparkle Wash",
-    price: 999,
-    rating: 4,
-    category: "Bathroom Cleaners",
-    image: "/images/Product1.png",
-  },
-  {
-    id: 4,
-    name: "Tile Grime Remover",
-    price: 849,
-    rating: 3,
-    category: "Bathroom Cleaners",
-    image: "/images/Product1.png",
-  },
-
-  // Floor Cleaners
-  {
-    id: 5,
-    name: "Floor Fresh Shine",
-    price: 1099,
-    rating: 4,
-    category: "Floor Cleaners",
-    image: "/images/Product1.png",
-  },
-  {
-    id: 6,
-    name: "Herbal Floor Sparkle",
-    price: 999,
-    rating: 5,
-    category: "Floor Cleaners",
-    image: "/images/Product1.png",
-  },
-
-  // Glass Cleaners
-  {
-    id: 7,
-    name: "Glass Gleam Pro",
-    price: 899,
-    rating: 3,
-    category: "Glass Cleaners",
-    image: "/images/Product1.png",
-  },
-  {
-    id: 8,
-    name: "Crystal Clear Spray",
-    price: 799,
-    rating: 4,
-    category: "Glass Cleaners",
-    image: "/images/Product1.png",
-  },
-
-  // Laundry Products
-  {
-    id: 9,
-    name: "Laundry Liquid Bliss",
-    price: 1499,
-    rating: 5,
-    category: "Laundry Products",
-    image: "/images/Product1.png",
-  },
-  {
-    id: 10,
-    name: "Eco Wash Detergent",
-    price: 1199,
-    rating: 4,
-    category: "Laundry Products",
-    image: "/images/Product1.png",
-  },
-
-  // All Products (generic)
-  {
-    id: 11,
-    name: "Universal Eco Cleaner",
-    price: 1299,
-    rating: 4,
-    category: "All Products",
-    image: "/images/Product1.png",
-  },
-];
+import { toast } from "react-hot-toast";
+import axios from "axios"; // Import axios
+import { USER_BASE_URL } from "../config";
 
 const AllProductPage = () => {
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
+  const [priceRange, setPriceRange] = useState({ min: null, max: null });
   const [selectedRatings, setSelectedRatings] = useState([]);
 
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${USER_BASE_URL}/api/products/all-products`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        const data = await response.json();
+        setProducts(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Function to handle adding product to wishlist using axios
+  const handleAddToWishlist = async (productId, e) => {
+    e.stopPropagation(); // Prevent navigating to product details page
+
+    if (!userId || !token) {
+      toast.error("Please log in to add items to your wishlist.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${USER_BASE_URL}/api/wishlist/add`,
+        { productId, userId },
+        {
+          headers: {
+            // Include authorization token if required, e.g.:
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      toast.success("Product added to wishlist!");
+      navigate("/wishlist");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Error adding product to wishlist"
+      );
+    }
+  };
+
+  // Function to handle adding product to cart
+  const handleAddToCart = async (productId, e) => {
+    e.stopPropagation();
+
+    if (!userId || !token) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${USER_BASE_URL}/api/cart/add`,
+        { productId, userId, quantity: 1 }, // Default quantity of 1
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      toast.success("Product added to cart!");
+      navigate("/cart");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Error adding product to cart"
+      );
+    }
+  };
+
   const handleCategoryToggle = (cat) => {
-    if (cat === "All Products") {
+    if (cat === "All Purpose") {
       setSelectedCategories((prev) =>
-        prev.includes(cat) ? [] : ["All Products"]
+        prev.includes(cat) ? [] : ["All Purpose"]
       );
     } else {
       setSelectedCategories((prev) => {
-        const withoutAll = prev.filter((c) => c !== "All Products");
+        const withoutAll = prev.filter((c) => c !== "All Purpose");
         return prev.includes(cat)
           ? withoutAll.filter((c) => c !== cat)
           : [...withoutAll, cat];
@@ -138,25 +124,57 @@ const AllProductPage = () => {
   };
 
   const filteredProducts = products.filter((product) => {
-    const allSelected = selectedCategories.includes("All Products");
+    const allSelected = selectedCategories.includes("All Purpose");
 
     const inCategory =
       selectedCategories.length === 0 ||
       allSelected ||
-      selectedCategories.includes(product.category);
+      selectedCategories.includes(product.Category?.name);
 
     const inPriceRange =
-      product.price >= priceRange.min && product.price <= priceRange.max;
+      (priceRange.min === null || product.price >= priceRange.min) &&
+      (priceRange.max === null || product.price <= priceRange.max);
 
     const inRating =
       selectedRatings.length === 0 ||
-      selectedRatings.some((r) => product.rating >= r);
+      selectedRatings.some((r) => product.averageRatings >= r);
 
     return inCategory && inPriceRange && inRating;
   });
 
+  const categories = [
+    "All Purpose",
+    "Kitchen",
+    "Bathroom",
+    "Floor",
+    "Glass",
+    "Laundry",
+  ];
+
+  if (loading) {
+    return (
+      <section className="container mx-auto py-12 px-2 md:px-4 lg:px-10 xl:px-8">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
+          All Products
+        </h2>
+        <p className="text-lg md:text-xl text-gray-500 mb-6">Loading...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="container mx-auto py-12 px-2 md:px-4 lg:px-10 xl:px-8">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
+          All Products
+        </h2>
+        <p className="text-lg md:text-xl text-red-500 mb-6">Error: {error}</p>
+      </section>
+    );
+  }
+
   return (
-    <section className="container mx-auto py-12 px-2 md:px-4 lg:px-10 xl:px-8 ">
+    <section className="container mx-auto py-12 px-2 md:px-4 lg:px-10 xl:px-8">
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
         All Products
       </h2>
@@ -173,14 +191,7 @@ const AllProductPage = () => {
               Categories
             </h3>
             <ul className="p-2 px-4">
-              {[
-                "All Products",
-                "Kitchen Cleaners",
-                "Bathroom Cleaners",
-                "Floor Cleaners",
-                "Glass Cleaners",
-                "Laundry Products",
-              ].map((cat, index) => (
+              {categories.map((cat, index) => (
                 <li key={index}>
                   <label className="flex items-center space-x-2 py-1">
                     <input
@@ -211,13 +222,14 @@ const AllProductPage = () => {
                   </span>
                   <input
                     type="text"
-                    value={priceRange.min}
-                    onChange={(e) =>
+                    value={priceRange.min ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setPriceRange({
                         ...priceRange,
-                        min: parseInt(e.target.value) || 0,
-                      })
-                    }
+                        min: value === "" ? null : parseInt(value) || 0,
+                      });
+                    }}
                     placeholder="₹0"
                     className="border border-gray-400 rounded px-2 py-2 lg:py-3 w-full text-base lg:text-lg"
                   />
@@ -228,13 +240,14 @@ const AllProductPage = () => {
                   </span>
                   <input
                     type="text"
-                    value={priceRange.max}
-                    onChange={(e) =>
+                    value={priceRange.max ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setPriceRange({
                         ...priceRange,
-                        max: parseInt(e.target.value) || "00",
-                      })
-                    }
+                        max: value === "" ? null : parseInt(value) || 9999999,
+                      });
+                    }}
                     placeholder="₹2000"
                     className="border border-gray-400 rounded px-2 py-2 lg:py-3 w-full text-base lg:text-lg"
                   />
@@ -275,49 +288,58 @@ const AllProductPage = () => {
 
         {/* Products Grid */}
         <div className="col-span-2 lg:col-span-4 xl:col-span-6 grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group relative rounded-xl border border-[#558bffb3] overflow-hidden transition h-fit cursor-pointer"
-              onClick={() => navigate(`/product/${product.id}`)}
-            >
-              <div className="relative">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full bg-blue-100"
-                />
-                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
+          {filteredProducts.length === 0 ? (
+            <p className="text-lg text-gray-500 col-span-full">
+              No products match the selected filters.
+            </p>
+          ) : (
+            filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="group relative rounded-xl border border-[#558bffb3] overflow-hidden transition h-fit cursor-pointer"
+                onClick={() => navigate(`/product/${product.id}`)}
+              >
+                <div className="relative">
+                  <img
+                    src={`${USER_BASE_URL}/${product.images[0]}`}
+                    alt={product.name}
+                    className="w-full bg-blue-100"
+                    onError={(e) => {
+                      e.target.src = "/fallback-image.jpg";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
 
-                {/* Icons on Hover */}
-                <div
-                  className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 transition-opacity duration-300 invisible md:visible"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    onClick={() => navigate("/wishlist")}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                  {/* Icons on Hover */}
+                  <div
+                    className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 transition-opacity duration-300 invisible md:visible"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <GoHeart />
-                  </button>
-                  <button
-                    onClick={() => navigate("/cart")}
-                    className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
-                  >
-                    <PiShoppingCart />
-                  </button>
+                    <button
+                      onClick={(e) => handleAddToWishlist(product.id, e)}
+                      className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                    >
+                      <GoHeart />
+                    </button>
+                    <button
+                      onClick={(e) => handleAddToCart(product.id, e)}
+                      className="text-white p-3 bg-[#558AFF] text-2xl rounded-full focus:outline-none cursor-pointer"
+                    >
+                      <PiShoppingCart />
+                    </button>
+                  </div>
+                </div>
+                <div className="py-4 px-3">
+                  <h3 className="text-sm font-medium text-black truncate whitespace-nowrap overflow-hidden">
+                    {product.name}
+                  </h3>
+                  <p className="text-[#558AFF] text-sm font-semibold mt-1">
+                    ₹{product.price}
+                  </p>
                 </div>
               </div>
-              <div className="py-4 px-3">
-                <h3 className="text-sm font-medium text-black truncate whitespace-nowrap overflow-hidden">
-                  {product.name}
-                </h3>
-                <p className="text-[#558AFF] text-sm font-semibold mt-1">
-                  ₹{product.price}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </section>
