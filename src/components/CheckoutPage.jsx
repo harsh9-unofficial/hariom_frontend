@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-hot-toast"; // Import react-hot-toast
 import { USER_BASE_URL } from "../config";
 
 const CheckoutPage = () => {
@@ -21,7 +22,6 @@ const CheckoutPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ message: "", type: "" });
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -68,9 +68,7 @@ const CheckoutPage = () => {
   // Get cart items or direct product from location state
   const { cartItems } = location.state || { cartItems: [] };
   const directProduct = location.state?.product || null;
-  const finalCartItems = directProduct
-    ? [{ ...directProduct, quantity: 1 }]
-    : cartItems;
+  const finalCartItems = directProduct ? [{ ...directProduct }] : cartItems;
 
   console.log("finalCartItems", finalCartItems);
 
@@ -133,23 +131,15 @@ const CheckoutPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Show toast notification
-  const showToast = (message, type) => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast({ message: "", type: "" });
-    }, 3000);
-  };
-
   // Handle Place Order button click
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
-      showToast("Please fill in all required fields correctly.", "error");
+      toast.error("Please fill in all required fields correctly.");
       return;
     }
 
     if (finalCartItems.length === 0) {
-      showToast("Your cart is empty.", "error");
+      toast.error("Your cart is empty.");
       return;
     }
 
@@ -158,7 +148,7 @@ const CheckoutPage = () => {
     const orderItems = finalCartItems
       .map((item) => {
         const product = item.Product || item;
-        const productId = product.id || product.productId;
+        const productId = product.id || product.productId || item.productId;
         if (!productId) {
           console.warn("Missing productId for item:", item);
           return null;
@@ -172,7 +162,7 @@ const CheckoutPage = () => {
       .filter((item) => item !== null);
 
     if (orderItems.length === 0) {
-      showToast("No valid items in the cart.", "error");
+      toast.error("No valid items in the cart.");
       setLoading(false);
       return;
     }
@@ -195,7 +185,7 @@ const CheckoutPage = () => {
         `${USER_BASE_URL}/api/order/create`,
         payload
       );
-      showToast(response.data.message || "Order placed successfully!", "success");
+      toast.success(response.data.message || "Order placed successfully!");
       setTimeout(() => {
         navigate("/track-order", {
           state: { order: response.data.order },
@@ -203,11 +193,10 @@ const CheckoutPage = () => {
       }, 2000);
     } catch (error) {
       console.error("Error placing order:", error.response?.data || error);
-      showToast(
+      toast.error(
         error.response?.data?.details ||
           error.response?.data?.error ||
-          "Failed to place order. Please try again.",
-        "error"
+          "Failed to place order. Please try again."
       );
     } finally {
       setLoading(false);
@@ -216,18 +205,6 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-2 md:px-4 lg:px-10 xl:px-8 py-12">
-      {/* Toast Notification */}
-      {toast.message && (
-        <div
-          className={`fixed top-4 right-4 p-4 rounded-md shadow-lg transition-all duration-300 z-50 ${
-            toast.type === "success"
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2">
         Check Out
       </h2>

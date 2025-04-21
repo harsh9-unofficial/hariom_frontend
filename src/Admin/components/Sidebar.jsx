@@ -19,7 +19,7 @@ const Sidebar = ({ onClose }) => {
     { name: "Users", path: "/admin/users", icon: ChatAltIcon },
     { name: "Reviews", path: "/admin/reviews", icon: CogIcon },
     { name: "Contact", path: "/admin/contact", icon: ChatAltIcon },
-    { name: "Inquiries", path: "/admin/inquiries", icon: InboxIcon },
+    { name: "Orders", path: "/admin/orders", icon: InboxIcon },
   ];
 
   const handleNavClick = () => {

@@ -10,7 +10,16 @@ import {
   CalendarIcon,
   EnvelopeIcon,
   ChatBubbleLeftIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
+import {
+  ListTree,
+  ShoppingBag,
+  Users,
+  Star,
+  MessageCircle,
+  Receipt,
+} from "lucide-react";
 import axios from "axios";
 import { USER_BASE_URL } from "../../config";
 import { Link } from "react-router-dom";
@@ -297,39 +306,39 @@ const Dashboard = () => {
           <div className="p-6">
             <div className="space-y-4">
               <Link
+                to="/admin/categories"
+                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center">
+                  <ListTree  className="h-5 w-5 text-green-600 mr-3" />
+                  <span>Manage Categories</span>
+                </div>
+              </Link>
+              <Link
                 to="/admin/products"
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <ShoppingBagIcon className="h-5 w-5 text-indigo-600 mr-3" />
+                  <ShoppingBag className="h-5 w-5 text-indigo-600 mr-3" />
                   <span>Manage Products</span>
                 </div>
               </Link>
               <Link
-                to="/admin/services"
+                to="/admin/users"
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <CogIcon className="h-5 w-5 text-green-600 mr-3" />
-                  <span>Manage Services</span>
+                  <Users className="h-5 w-5 text-red-600 mr-3" />
+                  <span>Manage Users</span>
                 </div>
               </Link>
               <Link
-                to="/admin/blogs"
+                to="/admin/reviews"
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <BookOpenIcon className="h-5 w-5 text-red-600 mr-3" />
-                  <span>Manage Blogs</span>
-                </div>
-              </Link>
-              <Link
-                to="/admin/inquiries"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center">
-                  <InboxIcon className="h-5 w-5 text-yellow-600 mr-3" />
-                  <span>View All Inquiries</span>
+                  <Star className="h-5 w-5 text-yellow-600 mr-3" />
+                  <span>View Reviews</span>
                 </div>
               </Link>
               <Link
@@ -337,8 +346,17 @@ const Dashboard = () => {
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <PhoneIcon className="h-5 w-5 text-pink-600 mr-3" />
-                  <span>View All Contacts</span>
+                  <MessageCircle className="h-5 w-5 text-pink-600 mr-3" />
+                  <span>View Contacts</span>
+                </div>
+              </Link>
+              <Link
+                to="/admin/orders"
+                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center">
+                  <Receipt className="h-5 w-5 text-yellow-600 mr-3" />
+                  <span>View Orders</span>
                 </div>
               </Link>
             </div>

@@ -25,7 +25,7 @@ const SingleProductPage = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${USER_BASE_URL}/api/products/${id}`);
-        console.log("Fetched product data:", response.data);
+        // console.log("Fetched product data:", response.data);
 
         let images = response.data.images;
         if (typeof images === "string") {
@@ -115,7 +115,7 @@ const SingleProductPage = () => {
           const response = await axios.get(
             `${USER_BASE_URL}/api/ratings/products/${id}`
           );
-          console.log("Reviews data:", response.data);
+          // console.log("Reviews data:", response.data);
           setReviews(response.data.slice(0, 2));
         } catch (err) {
           console.error("Fetch reviews error:", err);
@@ -156,7 +156,6 @@ const SingleProductPage = () => {
 
   const handleCheckout = () => {
     const token = localStorage.getItem("token");
-    console.log("Token:", token);
 
     if (!token) {
       toast.error("Please log in to proceed to checkout.");
@@ -169,15 +168,7 @@ const SingleProductPage = () => {
       return;
     }
 
-    // const checkoutData = {
-    //   id: product.id,
-    //   name: product.name,
-    //   price: product.price,
-    //   images: product.images,
-    //   quantity,
-    // };
-
-    console.log("Navigating to checkout with product:", product);
+    // console.log("Navigating to checkout with product:", product);
     navigate("/checkout", {
       state: { product: { ...product, quantity } },
     });

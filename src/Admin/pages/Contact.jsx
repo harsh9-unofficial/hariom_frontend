@@ -131,7 +131,9 @@ const Contact = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Contact Requests</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Manage Contact Requests
+        </h1>
 
         <div className="relative flex-grow max-w-md">
           <input

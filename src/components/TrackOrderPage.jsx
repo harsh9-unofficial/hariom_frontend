@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { User, ClipboardList, Trash2, LogOut, X, ArrowLeft } from "lucide-react";
+import {
+  User,
+  ClipboardList,
+  Trash2,
+  LogOut,
+  X,
+  ArrowLeft,
+} from "lucide-react";
 import axios from "axios";
 import { USER_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
@@ -56,7 +63,6 @@ const TrackOrderPage = () => {
       return;
     }
 
-    // Fetch user data and order history in parallel
     const fetchData = async () => {
       try {
         const [userResponse, orderResponse] = await Promise.all([
@@ -89,11 +95,13 @@ const TrackOrderPage = () => {
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await axios.get(
-        `${USER_BASE_URL}/api/order/${orderId}`,
+        `${USER_BASE_URL}/api/order/get/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      // console.log(response.data);
+
       setSelectedOrder(response.data);
     } catch (err) {
       console.error("Failed to fetch order details:", err);
@@ -129,11 +137,15 @@ const TrackOrderPage = () => {
   // Order status steps
   const statusSteps = [
     { id: 1, name: "Ordered", status: 1 },
-    { id: 2, name: "Processing", status: 2 },
-    { id: 3, name: "Shipped", status: 3 },
+    { id: 2, name: "Shipping", status: 2 },
+    { id: 3, name: "Out for Delivery", status: 3 },
     { id: 4, name: "Delivered", status: 4 },
-    { id: 5, name: "Cancelled", status: 5 },
   ];
+
+  // Determine current step based on selectedOrder status
+  const currentStep = selectedOrder
+    ? statusSteps.find((step) => step.status === selectedOrder.status)?.id || 1
+    : 1;
 
   return (
     <div className="container mx-auto px-2 md:px-4 lg:px-10 xl:px-8 py-12">
@@ -249,113 +261,112 @@ const TrackOrderPage = () => {
               <h3 className="text-xl font-semibold mb-4">Order History</h3>
               {selectedOrder ? (
                 // Detailed Order View
-                <div>
+                <div className="space-y-6">
                   <button
                     onClick={() => setSelectedOrder(null)}
-                    className="flex items-center gap-2 text-[#558AFF] mb-4 hover:underline"
+                    className="flex items-center gap-2 text-[#558AFF] mb-4 hover:underline cursor-pointer"
                     aria-label="Back to order list"
                   >
                     <ArrowLeft size={18} />
                     Back to Orders
                   </button>
-                  <h4 className="text-lg font-semibold mb-4">
-                    Order #{selectedOrder.id}
-                  </h4>
-                  <div className="space-y-4">
-                    {/* Order Items */}
-                    {selectedOrder.OrderItems?.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-4 border-b pb-4"
-                      >
-                        <img
-                          src={getProductImage(item.Product?.images)}
-                          alt={item.Product?.name || "Product"}
-                          className="w-16 h-16 rounded-md"
-                        />
-                        <div>
-                          <p className="font-medium">{item.Product?.name || "Unknown"}</p>
-                          <p className="text-sm text-gray-500">
-                            Quantity: {item.quantity}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Price: ₹{item.price.toFixed(2)}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Total: ₹{item.totalAmount.toFixed(2)}
+
+                  {/* Stepper */}
+                  <div className="relative flex justify-between items-center mb-10 md:px-4">
+                    {/* Connecting background line */}
+                    <div className="absolute top-4 left-[calc(12.5%+6px)] right-[calc(12.5%+6px)] h-0.5 bg-gray-300 z-0"></div>
+
+                    {/* Progress line */}
+                    <div
+                      className="absolute top-4 left-[calc(12.5%+2px)] h-0.5 bg-[#558AFF] z-10 transition-all duration-500"
+                      style={{ width: `calc(25% * ${currentStep - 1})` }}
+                    ></div>
+
+                    {/* Stepper circles */}
+                    {statusSteps.map((step, index) => {
+                      const stepNumber = index + 1;
+                      const isCompleted = stepNumber < currentStep;
+                      const isCurrent = stepNumber === currentStep;
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex flex-col items-center relative z-20 w-1/4"
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center border-2 text-sm font-bold transition-colors duration-300 ${
+                              isCompleted || isCurrent
+                                ? "bg-[#558AFF] text-white border-[#558AFF]"
+                                : "bg-white text-gray-400 border-gray-300"
+                            }`}
+                          >
+                            {isCompleted || isCurrent ? "✓" : stepNumber}
+                          </div>
+                          <p className="text-sm mt-2 text-center">
+                            {step.name}
                           </p>
                         </div>
-                      </div>
-                    ))}
-                    {/* Order Details */}
-                    <div className="mt-4">
+                      );
+                    })}
+                  </div>
+
+                  {/* Order Info Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border border-gray-400 rounded-md p-4">
+                      <h4 className="font-medium">
+                        Delivery by Hariom Chemicals
+                      </h4>
                       <p className="text-sm text-gray-500">
-                        Placed on: {new Date(selectedOrder.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Total: ₹{selectedOrder.totalPrice.toFixed(2)}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Shipping Address: {selectedOrder.address}, {selectedOrder.apt}, {selectedOrder.city}, {selectedOrder.state} {selectedOrder.postalCode}
+                        Tracking ID: {selectedOrder.id || "N/A"}
                       </p>
                     </div>
-                    {/* Order Status Progress Bar */}
-                    <div className="mt-8">
-                      <h4 className="text-lg font-semibold mb-4">Order Status</h4>
-                      <div className="flex items-center justify-between relative">
-                        {statusSteps.map((step, index) => (
-                          <div key={step.id} className="flex flex-col items-center">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                selectedOrder.status >= step.status
-                                  ? "bg-[#558AFF] text-white"
-                                  : "bg-gray-200 text-gray-500"
-                              }`}
-                            >
-                              {selectedOrder.status >= step.status ? "✓" : step.id}
-                            </div>
-                            <p className="text-sm mt-2">{step.name}</p>
-                            {index < statusSteps.length - 1 && (
-                              <div
-                                className={`absolute top-3 h-1 w-1/5 ${
-                                  selectedOrder.status > step.status
-                                    ? "bg-[#558AFF]"
-                                    : "bg-gray-200"
-                                }`}
-                                style={{
-                                  left: `calc(${(index + 1) * 20}% - 10%)`,
-                                }}
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                    <div className="border border-gray-400 rounded-md p-4">
+                      <h4 className="font-medium">Shipping Address</h4>
+                      <p className="text-sm text-gray-500">
+                        {selectedOrder.address || "N/A"},{" "}
+                        {selectedOrder.city || "N/A"},{" "}
+                        {selectedOrder.state || "N/A"}{" "}
+                        {selectedOrder.postalCode || "N/A"}
+                      </p>
                     </div>
+                  </div>
+
+                  {/* Product Image */}
+                  <div>
+                    <img
+                      src={getProductImage(
+                        selectedOrder.OrderItems?.[0]?.Product?.images
+                      )}
+                      alt={
+                        selectedOrder.OrderItems?.[0]?.Product?.name ||
+                        "Product"
+                      }
+                      className="rounded-2xl shadow w-full md:w-[49%] object-contain"
+                    />
                   </div>
                 </div>
               ) : orders.length === 0 ? (
                 <p className="text-gray-500">No orders found.</p>
               ) : (
                 // Order List View
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {orders.map((order) => (
                     <div
                       key={order.id}
-                      className="flex items-center gap-4 border-b pb-4"
+                      className="border rounded-lg p-2 cursor-pointer hover:shadow-lg"
+                      onClick={() => fetchOrderDetails(order.id)}
                     >
                       <img
-                        src={getProductImage(order.orderItems?.[0]?.Product?.images)}
-                        alt={order.orderItems?.[0]?.Product?.name || "Product"}
-                        className="w-16 h-16 rounded-md cursor-pointer"
-                        onClick={() => fetchOrderDetails(order.id)}
+                        src={getProductImage(
+                          order.OrderItems?.[0]?.Product?.images
+                        )}
+                        alt={order.OrderItems?.[0]?.Product?.name || "Product"}
+                        className="w-full h-57 object-contain rounded-t-lg"
                       />
-                      <div>
+                      <div className="p-2">
                         <p className="font-medium">
                           Order #{order.id} -{" "}
-                          {order.orderItems?.[0]?.Product?.name || "Unknown"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Placed on: {new Date(order.createdAt).toLocaleDateString()}
+                          {order.OrderItems?.[0]?.Product?.name || "Unknown"}
                         </p>
                         <p className="text-sm text-gray-500">
                           Total: ₹{order.totalPrice.toFixed(2)}
@@ -417,8 +428,8 @@ const TrackOrderPage = () => {
               </button>
             </div>
             <p className="text-sm text-gray-600">
-              Are you sure you want to delete your account? This action cannot be
-              undone.
+              Are you sure you want to delete your account? This action cannot
+              be undone.
             </p>
             <div className="flex justify-end gap-3 mt-6">
               <button

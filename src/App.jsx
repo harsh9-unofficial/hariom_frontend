@@ -31,9 +31,46 @@ import Dashboard from "./Admin/pages/Dashboard";
 import Products from "./Admin/pages/Products";
 import Blogs from "./Admin/pages/Categories";
 import Contact from "./Admin/pages/Contact";
-import Inquiries from "./Admin/pages/Inquiries";
+import Inquiries from "./Admin/pages/Orders";
 import Reviews from "./Admin/pages/Reviews";
 import Users from "./Admin/pages/Users";
+import Orders from "./Admin/pages/Orders";
+
+// Function to decode JWT token
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+}
+
+// Function to check if token is expired and remove it
+function checkTokenExpiration() {
+  const token = localStorage.getItem('authToken'); // Adjust key as needed
+  if (!token) return;
+
+  const decoded = decodeJwt(token);
+  if (!decoded || !decoded.exp) {
+    localStorage.removeItem('authToken');
+    return;
+  }
+
+  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  if (decoded.exp < currentTime) {
+    console.log('Token expired, removing from localStorage');
+    localStorage.removeItem('authToken');
+  }
+}
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -107,6 +144,13 @@ const PublicLayout = () => {
 };
 
 function App() {
+  useEffect(() => {
+    checkTokenExpiration(); // Run on mount
+    const interval = setInterval(checkTokenExpiration, 60 * 1000); // Check every minute
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
   return (
     <Router>
       <Routes>
@@ -121,7 +165,7 @@ function App() {
           <Route path="categories" element={<Blogs />} />
           <Route path="users" element={<Users />} />
           <Route path="contact" element={<Contact />} />
-          <Route path="inquiries" element={<Inquiries />} />
+          <Route path="orders" element={<Orders />} />
         </Route>
       </Routes>
     </Router>
