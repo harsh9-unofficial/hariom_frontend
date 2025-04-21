@@ -157,7 +157,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <div className="flex items-center space-x-4">
@@ -182,7 +182,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-5">
         {statsData.map((stat) => (
           <div
             key={stat.name}
@@ -310,7 +310,7 @@ const Dashboard = () => {
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <ListTree  className="h-5 w-5 text-green-600 mr-3" />
+                  <ListTree className="h-5 w-5 text-green-600 mr-3" />
                   <span>Manage Categories</span>
                 </div>
               </Link>

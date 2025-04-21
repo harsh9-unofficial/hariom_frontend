@@ -3,10 +3,11 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   ChartBarSquareIcon as ChartBarIcon,
+  Squares2X2Icon,
   ShoppingBagIcon,
-  Cog6ToothIcon as CogIcon,
-  BookOpenIcon,
-  ChatBubbleLeftRightIcon as ChatAltIcon,
+  UsersIcon,
+  StarIcon,
+  EnvelopeIcon,
   InboxIcon,
   XMarkIcon as XIcon,
 } from "@heroicons/react/24/outline";
@@ -14,11 +15,11 @@ import {
 const Sidebar = ({ onClose }) => {
   const navItems = [
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
-    { name: "Categories", path: "/admin/categories", icon: BookOpenIcon },
+    { name: "Categories", path: "/admin/categories", icon: Squares2X2Icon },
     { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
-    { name: "Users", path: "/admin/users", icon: ChatAltIcon },
-    { name: "Reviews", path: "/admin/reviews", icon: CogIcon },
-    { name: "Contact", path: "/admin/contact", icon: ChatAltIcon },
+    { name: "Users", path: "/admin/users", icon: UsersIcon },
+    { name: "Reviews", path: "/admin/reviews", icon: StarIcon },
+    { name: "Contact", path: "/admin/contact", icon: EnvelopeIcon },
     { name: "Orders", path: "/admin/orders", icon: InboxIcon },
   ];
 

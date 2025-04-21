@@ -180,8 +180,7 @@ const Orders = () => {
                               className="mb-1 flex items-center"
                             >
                               <span>
-                                {item.Product.name} - $
-                                {item.Product.price.toFixed(2)}
+                                {item.Product.name}
                               </span>
                               {item.Product.images?.length > 0 && (
                                 <img
@@ -316,13 +315,13 @@ const Orders = () => {
                     onClick={closeModal}
                     className="text-gray-500 hover:text-gray-700"
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6 cursor-pointer" />
                   </button>
                 </div>
                 <div className="p-4">
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-md font-medium text-gray-600">
                         Order Date
                       </p>
                       <p className="text-sm text-gray-900">
@@ -330,7 +329,7 @@ const Orders = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-md font-medium text-gray-600">
                         Status
                       </p>
                       <p className="text-sm text-gray-900">
@@ -342,10 +341,9 @@ const Orders = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-md font-medium text-gray-600">
                         Customer
                       </p>
-                      {console.log(selectedOrder)}
                       <p className="text-sm text-gray-900">
                         {selectedOrder.firstName || "N/A"}{" "}
                         {selectedOrder.lastName || "N/A"} (
@@ -353,7 +351,7 @@ const Orders = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-md font-medium text-gray-600">
                         Shipping Address
                       </p>
                       <p className="text-sm text-gray-900">
@@ -365,7 +363,7 @@ const Orders = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600 mb-2">
+                      <p className="text-md font-medium text-gray-600 mb-2">
                         Items
                       </p>
                       <div className="space-y-4">
@@ -380,11 +378,11 @@ const Orders = () => {
                                   JSON.parse(item.Product.images)[0]
                                 }`}
                                 alt={item.Product.name}
-                                className="h-16 w-16 rounded object-cover"
+                                className="h-20 rounded object-cover"
                               />
                             )}
                             <div>
-                              <p className="text-sm font-medium text-gray-900">
+                              <p className="text-md font-medium text-gray-900">
                                 {item.Product.name}
                               </p>
                               <p className="text-sm text-gray-600">
@@ -417,7 +415,7 @@ const Orders = () => {
                 <div className="p-4 border-t">
                   <button
                     onClick={closeModal}
-                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    className="w-full px-4 py-2 bg-[#558AFF] text-white rounded-lg cursor-pointer"
                   >
                     Close
                   </button>
