@@ -222,7 +222,9 @@ export default function CartPage() {
                     <img
                       src={
                         item.Product.images && item.Product.images[0]
-                          ? `${USER_BASE_URL}/${item.Product.images[0]}`
+                          ? `${USER_BASE_URL}/${
+                              JSON.parse(item.Product.images)[0]
+                            }`
                           : "/images/Product9.png"
                       }
                       alt={item.Product.name}
