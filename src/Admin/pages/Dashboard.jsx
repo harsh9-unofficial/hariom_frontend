@@ -10,7 +10,6 @@ import {
   CalendarIcon,
   EnvelopeIcon,
   ChatBubbleLeftIcon,
-  StarIcon,
 } from "@heroicons/react/24/outline";
 import {
   ListTree,
@@ -27,47 +26,70 @@ import { Link } from "react-router-dom";
 const Dashboard = () => {
   const [stats, setStats] = useState({
     products: 0,
-    services: 0,
-    blogs: 0,
-    inquiries: 0,
+    orders: 0,
+    categories: 0,
+    users: 0,
     contacts: 0,
+    ratings: 0, // Added ratings to stats
   });
-  const [recentInquiries, setRecentInquiries] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState("");
+
+  // Helper function to get the token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem("token"); // Adjust based on where your token is stored
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        const token = getAuthToken();
 
-        // Fetch all data in parallel
-        const [productsRes, servicesRes, blogsRes, inquiriesRes, contactsRes] =
+        if (!token) {
+          throw new Error("No authentication token found. Please log in.");
+        }
+
+        // Set default headers for axios
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        // Fetch all data in parallel with token, including ratings
+        const [productsRes, ordersRes, categoriesRes, usersRes, contactsRes, reviewsRes] =
           await Promise.all([
-            axios.get(`${USER_BASE_URL}/product/getall`),
-            axios.get(`${USER_BASE_URL}/service/getall`),
-            axios.get(`${USER_BASE_URL}/blog/getall`),
-            axios.get(`${USER_BASE_URL}/inquiry/getall`),
-            axios.get(`${USER_BASE_URL}/contact/getall`),
+            axios.get(`${USER_BASE_URL}/api/products`, { headers }),
+            axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
+            axios.get(`${USER_BASE_URL}/api/category`, { headers }),
+            axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
+            axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
+            axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
           ]);
 
-        // Get 5 most recent inquiries
-        const sortedInquiries = [...inquiriesRes.data]
+        // Get 5 most recent users
+        const sortedUsers = [...usersRes.data]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5);
 
         setStats({
           products: productsRes.data.length,
-          services: servicesRes.data.length,
-          blogs: blogsRes.data.length,
-          inquiries: inquiriesRes.data.length,
+          orders: ordersRes.data.length,
+          categories: categoriesRes.data.length,
+          users: usersRes.data.length,
           contacts: contactsRes.data.length,
+          ratings: reviewsRes.data.length, // Set ratings count
         });
 
-        setRecentInquiries(sortedInquiries);
+        setRecentUsers(sortedUsers);
         setLastUpdated(new Date().toLocaleTimeString());
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        if (error.message.includes("token")) {
+          alert(error.message); // Notify user to log in
+          // Optionally redirect to login page
+          // window.location.href = "/login";
+        }
       } finally {
         setLoading(false);
       }
@@ -83,31 +105,49 @@ const Dashboard = () => {
   const refreshData = async () => {
     setLoading(true);
     try {
-      const [productsRes, servicesRes, blogsRes, inquiriesRes, contactsRes] =
+      const token = getAuthToken();
+
+      if (!token) {
+        throw new Error("No authentication token found. Please log in.");
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      // Fetch all data in parallel with token, including ratings
+      const [productsRes, ordersRes, categoriesRes, usersRes, contactsRes, reviewsRes] =
         await Promise.all([
-          axios.get(`${USER_BASE_URL}/product/getall`),
-          axios.get(`${USER_BASE_URL}/service/getall`),
-          axios.get(`${USER_BASE_URL}/blog/getall`),
-          axios.get(`${USER_BASE_URL}/inquiry/getall`),
-          axios.get(`${USER_BASE_URL}/contact/getall`),
+          axios.get(`${USER_BASE_URL}/api/products`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/category`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
         ]);
 
-      const sortedInquiries = [...inquiriesRes.data]
+      const sortedUsers = [...usersRes.data]
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 5);
 
       setStats({
         products: productsRes.data.length,
-        services: servicesRes.data.length,
-        blogs: blogsRes.data.length,
-        inquiries: inquiriesRes.data.length,
+        orders: ordersRes.data.length,
+        categories: categoriesRes.data.length,
+        users: usersRes.data.length,
         contacts: contactsRes.data.length,
+        ratings: reviewsRes.data.length, // Set ratings count
       });
 
-      setRecentInquiries(sortedInquiries);
+      setRecentUsers(sortedUsers);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
       console.error("Error refreshing data:", error);
+      if (error.message.includes("token")) {
+        alert(error.message); // Notify user to log in
+        // Optionally redirect to login page
+        // window.location.href = "/login";
+      }
     } finally {
       setLoading(false);
     }
@@ -125,34 +165,40 @@ const Dashboard = () => {
 
   const statsData = [
     {
-      name: "Total Products",
+      name: "Categories",
+      value: stats.categories,
+      icon: BookOpenIcon,
+      color: "bg-red-100 text-red-600",
+    },
+    {
+      name: "Products",
       value: stats.products,
       icon: ShoppingBagIcon,
       color: "bg-indigo-100 text-indigo-600",
     },
     {
-      name: "Total Services",
-      value: stats.services,
+      name: "Orders",
+      value: stats.orders,
       icon: CogIcon,
       color: "bg-green-100 text-green-600",
     },
     {
-      name: "Total Blogs",
-      value: stats.blogs,
-      icon: BookOpenIcon,
-      color: "bg-red-100 text-red-600",
-    },
-    {
-      name: "New Inquiries",
-      value: stats.inquiries,
+      name: "Users",
+      value: stats.users,
       icon: InboxIcon,
       color: "bg-yellow-100 text-yellow-600",
     },
     {
-      name: "New Contacts",
+      name: "Contacts",
       value: stats.contacts,
       icon: PhoneIcon,
       color: "bg-pink-100 text-pink-600",
+    },
+    {
+      name: "Reviews",
+      value: stats.ratings,
+      icon: Star, // Using Star icon from lucide-react for consistency
+      color: "bg-purple-100 text-purple-600", // Unique color for ratings
     },
   ];
 
@@ -160,8 +206,8 @@ const Dashboard = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-500">
+        <div className="flex items-center">
+          <span className="text-sm text-gray-500 text-center">
             Last updated: {lastUpdated}
           </span>
           <button
@@ -182,7 +228,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-5">
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-6">
         {statsData.map((stat) => (
           <div
             key={stat.name}
@@ -191,7 +237,7 @@ const Dashboard = () => {
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
                 <div className={`flex-shrink-0 rounded-md p-3 ${stat.color}`}>
-                  <stat.icon className="h-6 w-6" />
+                  <stat.icon className="h-5 w-5" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dt className="text-sm font-medium text-gray-500 truncate">
@@ -211,92 +257,90 @@ const Dashboard = () => {
 
       {/* Charts and Activity Section */}
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Inquiries */}
+        {/* Recent Users */}
         <div className="bg-white shadow rounded-lg overflow-hidden lg:col-span-2">
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Recent Inquiries
+              Recent Users
             </h3>
-            <span className="text-sm text-gray-500">Last 5 inquiries</span>
+            <span className="text-sm text-gray-500">Last 5 users</span>
           </div>
           <div className="bg-white overflow-hidden">
-            {loading ? (
+            {/* {loading ? (
               <div className="flex justify-center items-center h-40">
                 <ArrowPathIcon className="h-8 w-8 text-gray-400 animate-spin" />
               </div>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {recentInquiries.length > 0 ? (
-                  recentInquiries.map((inquiry) => (
+                {recentUsers.length > 0 ? (
+                  recentUsers.map((user) => (
                     <li
-                      key={inquiry.inquiryId}
+                      key={user.id}
                       className="px-4 py-4 sm:px-6 hover:bg-gray-50"
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-indigo-600 truncate">
-                          {inquiry.inquiryType} Inquiry
+                          {user.userType || "User"}
                         </p>
                         <div className="ml-2 flex-shrink-0 flex">
                           <p
                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              inquiry.status === "new"
+                              user.status === "active"
                                 ? "bg-green-100 text-green-800"
-                                : inquiry.status === "pending"
+                                : user.status === "pending"
                                 ? "bg-yellow-100 text-yellow-800"
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
-                            {inquiry.status || "new"}
+                            {user.status || "active"}
                           </p>
                         </div>
                       </div>
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex items-center">
                           <UserIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
-                          <p className="text-sm text-gray-500">
-                            {inquiry.name}
-                          </p>
+                          <p className="text-sm text-gray-500">{user.name}</p>
                         </div>
                         <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <CalendarIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
-                          {formatDate(inquiry.createdAt)}
+                          {formatDate(user.createdAt)}
                         </div>
                       </div>
                       <div className="mt-2 flex items-start">
                         <ChatBubbleLeftIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1 mt-1" />
                         <p className="text-sm text-gray-500 line-clamp-2">
-                          {inquiry.message}
+                          {user.message || "No message provided"}
                         </p>
                       </div>
                       <div className="mt-2 flex items-center">
                         <EnvelopeIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
                         <a
-                          href={`mailto:${inquiry.email}`}
+                          href={`mailto:${user.email}`}
                           className="text-xs text-blue-600 hover:underline"
                         >
-                          {inquiry.email}
+                          {user.email}
                         </a>
                         <PhoneIcon className="flex-shrink-0 h-4 w-4 text-gray-400 ml-3 mr-1" />
                         <a
-                          href={`tel:${inquiry.phone}`}
+                          href={`tel:${user.phone}`}
                           className="text-xs text-gray-600"
                         >
-                          {inquiry.phone}
+                          {user.phone || "N/A"}
                         </a>
                       </div>
                     </li>
                   ))
                 ) : (
                   <div className="text-center py-10">
-                    <p className="text-gray-500">No recent inquiries</p>
+                    <p className="text-gray-500">No recent users</p>
                   </div>
                 )}
               </ul>
-            )}
+            )} */}
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Quick Actions */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -333,7 +377,7 @@ const Dashboard = () => {
                 </div>
               </Link>
               <Link
-                to="/admin/reviews"
+                to="/admin/ratings"
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">

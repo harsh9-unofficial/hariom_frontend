@@ -19,6 +19,7 @@ const TrackOrderPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isFormEditable, setIsFormEditable] = useState(false);
   const [userData, setUserData] = useState({
     fullname: "",
     username: "",
@@ -26,14 +27,15 @@ const TrackOrderPage = () => {
     dob: "",
     email: "",
   });
+  const [originalUserData, setOriginalUserData] = useState({});
   const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null); // Store full order details
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     if (tab !== "history") {
-      setSelectedOrder(null); // Reset selected order when switching tabs
+      setSelectedOrder(null);
     }
   };
 
@@ -42,7 +44,6 @@ const TrackOrderPage = () => {
       ? "bg-[#558AFF] text-white font-medium"
       : "hover:bg-gray-100 text-black";
 
-  // Utility function to get product image
   const getProductImage = (images) => {
     try {
       const imageArray = Array.isArray(images)
@@ -74,13 +75,39 @@ const TrackOrderPage = () => {
           }),
         ]);
 
-        setUserData({
+        // Normalize DOB to YYYY-MM-DD format
+        const formatDate = (date) => {
+          if (!date) return "";
+
+          let parsedDate;
+          if (date.includes("-")) {
+            const parts = date.split("-");
+            if (parts.length === 3 && parts[0].length === 2) {
+              parsedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            } else {
+              parsedDate = new Date(date);
+            }
+          } else {
+            parsedDate = new Date(date);
+          }
+          if (isNaN(parsedDate)) return "";
+
+          return parsedDate.toISOString().split("T")[0];
+        };
+
+        const fetchedUserData = {
           fullname: userResponse.data.user.fullname || "",
           username: userResponse.data.user.username || "",
           phone: userResponse.data.user.phone || "",
-          dob: userResponse.data.user.dob || "",
+          dob: formatDate(userResponse.data.user.dob),
           email: userResponse.data.user.email || "",
-        });
+        };
+
+        console.log("API User Response:", userResponse.data.user); // Debug API response
+        console.log("Formatted DOB:", fetchedUserData.dob); // Debug DOB
+
+        setUserData(fetchedUserData);
+        setOriginalUserData(fetchedUserData);
         setOrders(orderResponse.data || []);
       } catch (err) {
         console.error("Failed to fetch data:", err);
@@ -91,7 +118,6 @@ const TrackOrderPage = () => {
     fetchData();
   }, [userId, token, navigate]);
 
-  // Fetch specific order details
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await axios.get(
@@ -100,8 +126,6 @@ const TrackOrderPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // console.log(response.data);
-
       setSelectedOrder(response.data);
     } catch (err) {
       console.error("Failed to fetch order details:", err);
@@ -109,7 +133,49 @@ const TrackOrderPage = () => {
     }
   };
 
-  // Handle Delete Account
+  const handleFormUpdate = async () => {
+    if (!isFormEditable) {
+      setIsFormEditable(true);
+      return;
+    }
+
+    const updatedData = {
+      fullname: userData.fullname,
+      username: userData.username,
+      phone: userData.phone,
+      dob: userData.dob || undefined,
+      email: userData.email,
+    };
+
+    try {
+      const response = await axios.patch(
+        `${USER_BASE_URL}/api/users/profile/${userId}`,
+        updatedData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Profile updated successfully.");
+      setIsFormEditable(false);
+      setOriginalUserData(userData);
+
+      // Normalize DOB in the response
+      const updatedUserData = {
+        fullname: response.data.user.fullname || "",
+        username: response.data.user.username || "",
+        phone: response.data.user.phone || "",
+        dob: response.data.user.dob
+          ? new Date(response.data.user.dob).toISOString().split("T")[0]
+          : "",
+        email: response.data.user.email || "",
+      };
+      setUserData(updatedUserData);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      toast.error(err.response?.data?.message || "Failed to update profile.");
+    }
+  };
+
   const handleDeleteAccount = async () => {
     try {
       await axios.delete(`${USER_BASE_URL}/api/users/${userId}`, {
@@ -126,7 +192,6 @@ const TrackOrderPage = () => {
     }
   };
 
-  // Handle Logout
   const handleLogout = () => {
     localStorage.clear();
     toast.success("Logged out successfully.");
@@ -134,7 +199,6 @@ const TrackOrderPage = () => {
     navigate("/login");
   };
 
-  // Order status steps
   const statusSteps = [
     { id: 1, name: "Ordered", status: 1 },
     { id: 2, name: "Shipping", status: 2 },
@@ -142,7 +206,6 @@ const TrackOrderPage = () => {
     { id: 4, name: "Delivered", status: 4 },
   ];
 
-  // Determine current step based on selectedOrder status
   const currentStep = selectedOrder
     ? statusSteps.find((step) => step.status === selectedOrder.status)?.id || 1
     : 1;
@@ -153,7 +216,6 @@ const TrackOrderPage = () => {
       <p className="text-gray-500 mb-6">Home / Track Your Order</p>
 
       <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
-        {/* Sidebar */}
         <div className="w-full md:w-1/3 lg:w-3/10 h-fit border border-gray-400 rounded-xl p-4 lg:p-10 flex flex-col">
           <div className="flex items-center gap-3 mb-4">
             <img
@@ -204,7 +266,6 @@ const TrackOrderPage = () => {
           </div>
         </div>
 
-        {/* Right Side Content */}
         <div className="w-full md:w-2/3 lg:w-7/10 border border-gray-400 rounded-xl py-5 lg:py-10 px-3 md:px-4 lg:px-8 h-fit">
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -213,8 +274,13 @@ const TrackOrderPage = () => {
                 <input
                   type="text"
                   value={userData.fullname}
-                  readOnly
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
+                  onChange={(e) =>
+                    setUserData({ ...userData, fullname: e.target.value })
+                  }
+                  readOnly={!isFormEditable}
+                  className={`w-full border border-gray-400 rounded-md py-3 px-4 ${
+                    isFormEditable ? "bg-white" : "bg-gray-100"
+                  }`}
                 />
               </div>
               <div>
@@ -222,8 +288,13 @@ const TrackOrderPage = () => {
                 <input
                   type="text"
                   value={userData.username}
-                  readOnly
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
+                  onChange={(e) =>
+                    setUserData({ ...userData, username: e.target.value })
+                  }
+                  readOnly={!isFormEditable}
+                  className={`w-full border border-gray-400 rounded-md py-3 px-4 ${
+                    isFormEditable ? "bg-white" : "bg-gray-100"
+                  }`}
                 />
               </div>
               <div>
@@ -231,27 +302,50 @@ const TrackOrderPage = () => {
                 <input
                   type="text"
                   value={userData.phone}
-                  readOnly
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
+                  onChange={(e) =>
+                    setUserData({ ...userData, phone: e.target.value })
+                  }
+                  readOnly={!isFormEditable}
+                  className={`w-full border border-gray-400 rounded-md py-3 px-4 ${
+                    isFormEditable ? "bg-white" : "bg-gray-100"
+                  }`}
                 />
               </div>
               <div>
                 <label className="block mb-1">DOB</label>
                 <input
-                  type="text"
+                  type="date"
                   value={userData.dob}
-                  readOnly
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100"
+                  onChange={(e) =>
+                    setUserData({ ...userData, dob: e.target.value })
+                  }
+                  readOnly={!isFormEditable}
+                  className={`w-full border border-gray-400 rounded-md py-3 px-4 ${
+                    isFormEditable ? "bg-white" : "bg-gray-100"
+                  }`}
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label className="block mb-1">Email</label>
                 <input
                   type="email"
                   value={userData.email}
-                  readOnly
-                  className="w-full border border-gray-400 rounded-md py-3 px-4 bg-gray-100 text-gray-600"
+                  onChange={(e) =>
+                    setUserData({ ...userData, email: e.target.value })
+                  }
+                  readOnly={!isFormEditable}
+                  className={`w-full border border-gray-400 rounded-md py-3 px-4 ${
+                    isFormEditable ? "bg-white" : "bg-gray-100"
+                  } text-gray-600`}
                 />
+              </div>
+              <div className="flex items-end text-right">
+                <button
+                  onClick={handleFormUpdate}
+                  className="bg-[#558AFF] text-white px-4 py-3 rounded-md cursor-pointer h-fit transition"
+                >
+                  {isFormEditable ? "Save" : "Update"}
+                </button>
               </div>
             </div>
           )}
@@ -260,7 +354,6 @@ const TrackOrderPage = () => {
             <div className="space-y-6">
               <h3 className="text-xl font-semibold mb-4">Order History</h3>
               {selectedOrder ? (
-                // Detailed Order View
                 <div className="space-y-6">
                   <button
                     onClick={() => setSelectedOrder(null)}
@@ -271,18 +364,12 @@ const TrackOrderPage = () => {
                     Back to Orders
                   </button>
 
-                  {/* Stepper */}
                   <div className="relative flex justify-between items-center mb-10 md:px-4">
-                    {/* Connecting background line */}
                     <div className="absolute top-4 left-[calc(12.5%+6px)] right-[calc(12.5%+6px)] h-0.5 bg-gray-300 z-0"></div>
-
-                    {/* Progress line */}
                     <div
                       className="absolute top-4 left-[calc(12.5%+2px)] h-0.5 bg-[#558AFF] z-10 transition-all duration-500"
                       style={{ width: `calc(25% * ${currentStep - 1})` }}
                     ></div>
-
-                    {/* Stepper circles */}
                     {statusSteps.map((step, index) => {
                       const stepNumber = index + 1;
                       const isCompleted = stepNumber < currentStep;
@@ -310,7 +397,6 @@ const TrackOrderPage = () => {
                     })}
                   </div>
 
-                  {/* Order Info Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="border border-gray-400 rounded-md p-4">
                       <h4 className="font-medium">
@@ -331,7 +417,6 @@ const TrackOrderPage = () => {
                     </div>
                   </div>
 
-                  {/* Product Image */}
                   <div>
                     <img
                       src={getProductImage(
@@ -348,7 +433,6 @@ const TrackOrderPage = () => {
               ) : orders.length === 0 ? (
                 <p className="text-gray-500">No orders found.</p>
               ) : (
-                // Order List View
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {orders.map((order) => (
                     <div
@@ -407,7 +491,6 @@ const TrackOrderPage = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
@@ -449,7 +532,6 @@ const TrackOrderPage = () => {
         </div>
       )}
 
-      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"

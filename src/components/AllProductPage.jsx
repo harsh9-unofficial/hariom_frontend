@@ -101,18 +101,18 @@ const AllProductPage = () => {
   };
 
   const handleCategoryToggle = (cat) => {
-    if (cat === "All Purpose") {
-      setSelectedCategories((prev) =>
-        prev.includes(cat) ? [] : ["All Purpose"]
-      );
-    } else {
-      setSelectedCategories((prev) => {
-        const withoutAll = prev.filter((c) => c !== "All Purpose");
-        return prev.includes(cat)
-          ? withoutAll.filter((c) => c !== cat)
-          : [...withoutAll, cat];
-      });
-    }
+    setSelectedCategories((prev) => {
+      if (cat === "All Purpose") {
+        // If All Purpose is selected, only include it
+        return prev.includes(cat) ? [] : ["All Purpose"];
+      } else {
+        // If another category is selected, exclude All Purpose and toggle the selected category
+        const withoutAllPurpose = prev.filter((c) => c !== "All Purpose");
+        return withoutAllPurpose.includes(cat)
+          ? withoutAllPurpose.filter((c) => c !== cat)
+          : [...withoutAllPurpose, cat];
+      }
+    });
   };
 
   const handleRatingToggle = (rating) => {
@@ -124,21 +124,21 @@ const AllProductPage = () => {
   };
 
   const filteredProducts = products.filter((product) => {
-    const allSelected = selectedCategories.includes("All Purpose");
-
+    // Category filter
     const inCategory =
-      selectedCategories.length === 0 ||
-      allSelected ||
-      selectedCategories.includes(product.Category?.name);
-
+      selectedCategories.length === 0 || // Show all products if no categories are selected
+      selectedCategories.includes(product.Category?.name); // Match selected categories exactly
+  
+    // Price range filter
     const inPriceRange =
       (priceRange.min === null || product.price >= priceRange.min) &&
       (priceRange.max === null || product.price <= priceRange.max);
-
+  
+    // Rating filter
     const inRating =
       selectedRatings.length === 0 ||
       selectedRatings.some((r) => product.averageRatings >= r);
-
+  
     return inCategory && inPriceRange && inRating;
   });
 

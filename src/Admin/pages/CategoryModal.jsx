@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { USER_BASE_URL } from "../../config";
 import { toast } from "react-hot-toast";
@@ -109,7 +108,7 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -126,7 +125,7 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               />
             </div>
@@ -141,7 +140,7 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-[#558AFF] hover:file:bg-[#558AFF]-100"
               />
               {previewImage && (
                 <img
@@ -160,17 +159,17 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border rounded-md text-gray-700 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || (!category && !formData.image)}
-              className={`px-4 py-2 rounded-md text-white ${
+              className={`px-4 py-2 rounded-md text-white cursor-pointer ${
                 isSubmitting || (!category && !formData.image)
-                  ? "bg-indigo-400"
-                  : "bg-indigo-600 hover:bg-indigo-700"
+                  ? "bg-[#558AFF]"
+                  : "bg-[#558AFF]"
               }`}
             >
               {isSubmitting ? "Saving..." : "Save Category"}

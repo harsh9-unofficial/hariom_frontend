@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { USER_BASE_URL } from "../config";
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -20,6 +22,13 @@ export default function Categories() {
 
     fetchCategories();
   }, []);
+
+  // Handle category click
+  const handleCategoryClick = (categoryName) => {
+    // Convert category name to URL-friendly format (e.g., "All Purpose" -> "all-purpose")
+    const formattedName = categoryName.toLowerCase();
+    navigate(`/category/${formattedName}`); // Navigate to category page with formatted name
+  };
 
   if (loading) {
     return <div className="text-center py-10">Loading categories...</div>;
@@ -37,6 +46,7 @@ export default function Categories() {
               src={`${USER_BASE_URL}${cat.image}`}
               alt={cat.name}
               className="w-[170px] h-auto md:w-[220px] lg:w-[250px] rounded-xl mx-auto mb-2 hover:scale-105 cursor-pointer transition-transform duration-300"
+              onClick={() => handleCategoryClick(cat.name)} // Pass category name
             />
             <p className="text-xl font-medium">{cat.name}</p>
           </div>

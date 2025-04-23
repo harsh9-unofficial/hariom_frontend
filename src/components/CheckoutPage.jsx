@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // Import react-hot-toast
+import { toast } from "react-hot-toast";
 import { USER_BASE_URL } from "../config";
 
 const CheckoutPage = () => {
@@ -133,18 +133,23 @@ const CheckoutPage = () => {
 
   // Handle Place Order button click
   const handlePlaceOrder = async () => {
+    if (!userId || !token) {
+      toast.error("Please login to place the order.");
+      return;
+    }
+  
     if (!validateForm()) {
       toast.error("Please fill in all required fields correctly.");
       return;
     }
-
+  
     if (finalCartItems.length === 0) {
       toast.error("Your cart is empty.");
       return;
     }
-
+  
     setLoading(true);
-
+  
     const orderItems = finalCartItems
       .map((item) => {
         const product = item.Product || item;
@@ -160,26 +165,26 @@ const CheckoutPage = () => {
         };
       })
       .filter((item) => item !== null);
-
+  
     if (orderItems.length === 0) {
       toast.error("No valid items in the cart.");
       setLoading(false);
       return;
     }
-
+  
     const payload = {
       userId,
       shippingCharge: shipping,
       tax,
       totalPrice: parseFloat(total),
       paymentMethod,
-      formData,
-      status: 1, // Pending
+      status: 1,
       orderItems,
+      ...formData, // Spread formData directly
     };
-
+  
     console.log("Order Payload:", JSON.stringify(payload, null, 2));
-
+  
     try {
       const response = await axios.post(
         `${USER_BASE_URL}/api/order/create`,

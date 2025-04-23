@@ -24,6 +24,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     shelfLife: "",
     madeIn: "",
     packaging: "",
+    combos: false,
   });
   const [previewImages, setPreviewImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,6 +78,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         shelfLife: product.shelfLife || "",
         madeIn: product.madeIn || "",
         packaging: product.packaging || "",
+        combos: product.combos || false,
       });
       // Set preview images from existing product
       const existingImages = Array.isArray(product.images)
@@ -104,14 +106,18 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         shelfLife: "",
         madeIn: "",
         packaging: "",
+        combos: false,
       });
       setPreviewImages([]);
     }
   }, [product]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleImagesChange = (e) => {
@@ -208,7 +214,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     formPayload.append("stock", formData.stock.toString());
     formPayload.append("features", JSON.stringify(formData.features));
     formPayload.append("howToUse", JSON.stringify(formData.howToUse));
-    formPayload.append("images", JSON.stringify(formData.images));
     formPayload.append("volume", formData.volume || "");
     formPayload.append("ingredients", formData.ingredients);
     formPayload.append("scent", formData.scent || "");
@@ -216,13 +221,12 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     formPayload.append("shelfLife", formData.shelfLife || "");
     formPayload.append("madeIn", formData.madeIn || "");
     formPayload.append("packaging", formData.packaging || "");
+    formPayload.append("combos", formData.combos.toString());
 
     formData.images.forEach((image) => {
       formPayload.append("images", image);
     });
 
-    // Enhanced debugging: Log FormData contents
-    console.log("FormData contents:");
     for (let pair of formPayload.entries()) {
       console.log(
         `${pair[0]}: ${pair[1] instanceof File ? "[File Object]" : pair[1]}`
@@ -280,7 +284,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <XMarkIcon className="h-6 w-6 cursor-pointer" />
           </button>
         </div>
 
@@ -295,7 +299,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               />
             </div>
@@ -308,7 +312,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               >
                 <option value="">Select Category</option>
@@ -333,7 +337,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               />
             </div>
@@ -348,7 +352,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 value={formData.stock}
                 onChange={handleInputChange}
                 min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
           </div>
@@ -362,7 +366,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
               value={formData.shortDescription}
               onChange={handleInputChange}
               rows={2}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               required
             />
           </div>
@@ -376,7 +380,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
               value={formData.longDescription}
               onChange={handleInputChange}
               rows={4}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               required
             />
           </div>
@@ -391,12 +395,12 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 value={featureInput}
                 onChange={(e) => setFeatureInput(e.target.value)}
                 placeholder="Add feature"
-                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
               <button
                 type="button"
                 onClick={addFeature}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="px-4 py-2 bg-[#558AFF] text-white rounded-md cursor-pointer"
               >
                 Add
               </button>
@@ -433,12 +437,12 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 value={howToUseInput}
                 onChange={(e) => setHowToUseInput(e.target.value)}
                 placeholder="Add how to use item"
-                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
               <button
                 type="button"
                 onClick={addHowToUse}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="px-4 py-2 bg-[#558AFF] text-white rounded-md cursor-pointer"
               >
                 Add
               </button>
@@ -477,7 +481,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="suitableSurfaces"
                 value={formData.suitableSurfaces}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               />
             </div>
@@ -493,7 +497,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
 
@@ -506,7 +510,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="ingredients"
                 value={formData.ingredients}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
                 required
               />
             </div>
@@ -520,7 +524,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="scent"
                 value={formData.scent}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
 
@@ -536,7 +540,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 step="0.1"
                 min="0"
                 max="14"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
 
@@ -550,7 +554,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 value={formData.shelfLife}
                 onChange={handleInputChange}
                 min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
 
@@ -563,7 +567,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="madeIn"
                 value={formData.madeIn}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
             </div>
 
@@ -576,8 +580,24 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="packaging"
                 value={formData.packaging}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Combos
+              </label>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="combos"
+                  checked={formData.combos}
+                  onChange={handleInputChange}
+                  className="h-5 w-5 text-[#558AFF] focus:ring-[#558AFF] border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-700">Combos</span>
+              </div>
             </div>
           </div>
 
@@ -590,7 +610,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
               accept="image/*"
               multiple
               onChange={handleImagesChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e6edff] file:text-[#558AFF] hover:file:bg-[#d1dfffda] file:cursor-pointer"
             />
             {previewImages.length > 0 && (
               <div className="mt-2 flex gap-2 flex-wrap">
@@ -610,17 +630,15 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border rounded-md text-gray-700 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 rounded-md text-white ${
-                isSubmitting
-                  ? "bg-indigo-400"
-                  : "bg-indigo-600 hover:bg-indigo-700"
+              className={`px-4 py-2 rounded-md text-white cursor-pointer ${
+                isSubmitting ? "bg-[#8aa7ff]" : "bg-[#558AFF] "
               }`}
             >
               {isSubmitting ? "Saving..." : "Save Product"}

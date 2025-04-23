@@ -90,7 +90,7 @@ const Products = () => {
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#558AFF] cursor-pointer"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -101,7 +101,7 @@ const Products = () => {
               setCurrentProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-[#558AFF] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add Product</span>
@@ -185,18 +185,18 @@ const Products = () => {
                         onClick={() => {
                           setCurrentProduct({
                             ...product,
-                            images: product.images, // Pass parsed images to modal
+                            images: product.images,
                           });
                           setIsModalOpen(true);
                         }}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-[#558AFF] cursor-pointer"
                         title="Edit"
                       >
                         <PencilSquareIcon className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 cursor-pointer"
                         title="Delete"
                       >
                         <TrashIcon className="h-5 w-5" />

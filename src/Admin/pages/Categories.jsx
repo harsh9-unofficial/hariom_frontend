@@ -61,7 +61,7 @@ const Categories = () => {
             <input
               type="text"
               placeholder="Search categories..."
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#558AFF]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -72,7 +72,7 @@ const Categories = () => {
               setCurrentBlog(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-[#558AFF] cursor-pointer text-white px-4 py-2 rounded-lg transition-colors"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add Category</span>
@@ -89,7 +89,7 @@ const Categories = () => {
           <p className="text-gray-500 text-lg">No categories found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {categories.map((category) => (
             <div
               key={category.id}
@@ -114,7 +114,7 @@ const Categories = () => {
                       setCurrentBlog(category);
                       setIsModalOpen(true);
                     }}
-                    className="p-2 bg-white rounded-full shadow text-indigo-600 hover:bg-indigo-50"
+                    className="p-2 bg-white rounded-full shadow text-[#558AFF] hover:bg-indigo-50"
                   >
                     <PencilSquareIcon className="h-4 w-4" />
                   </button>

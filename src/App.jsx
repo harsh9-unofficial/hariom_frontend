@@ -35,6 +35,7 @@ import Inquiries from "./Admin/pages/Orders";
 import Reviews from "./Admin/pages/Reviews";
 import Users from "./Admin/pages/Users";
 import Orders from "./Admin/pages/Orders";
+import CategoryProducts from "./components/CategoryProducts";
 
 // Function to decode JWT token
 function decodeJwt(token) {
@@ -131,6 +132,7 @@ const PublicLayout = () => {
         <Route path="/contact" element={<ContactUsPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/category/:categoryName" element={<CategoryProducts />} />
         <Route path="/product/:id" element={<SingleProductPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/track-order" element={<TrackOrderPage />} />

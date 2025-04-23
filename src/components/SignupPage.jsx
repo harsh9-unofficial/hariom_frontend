@@ -13,6 +13,7 @@ export default function SignupPage() {
     fullname: "",
     username: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -53,6 +54,11 @@ export default function SignupPage() {
     return errors;
   };
 
+  const validatePhone = (phone) => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -71,11 +77,16 @@ export default function SignupPage() {
     if (!formData.email.trim()) {
       errors.email = "Email is required!";
     } else {
-      // Email validation
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(formData.email)) {
         errors.email = "Invalid email address!";
       }
+    }
+
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone number is required!";
+    } else if (!validatePhone(formData.phone)) {
+      errors.phone = "Phone number must be exactly 10 digits!";
     }
 
     if (!formData.password.trim()) {
@@ -112,6 +123,7 @@ export default function SignupPage() {
         fullname: formData.fullname,
         username: formData.username,
         email: formData.email,
+        phone: formData.phone,
         password: formData.password,
       });
 
@@ -125,7 +137,6 @@ export default function SignupPage() {
     } catch (err) {
       let serverMessage = "An error occurred. Please try again.";
 
-      // Try to extract server response message if available
       if (err.response && err.response.data && err.response.data.message) {
         serverMessage = err.response.data.message;
       }
@@ -150,7 +161,6 @@ export default function SignupPage() {
         </Link>
       </div>
 
-      {/* Signup Form */}
       <div className="w-full max-w-xl space-y-4">
         <div className="relative">
           <input
@@ -174,6 +184,20 @@ export default function SignupPage() {
             onChange={handleChange}
             className={`w-full border ${
               error.username ? "border-red-500" : "border-gray-300"
+            } rounded-md px-4 py-5 text-base focus:outline-none focus:ring-2 focus:ring-[#558AFF] placeholder-gray-700 placeholder:font-semibold`}
+          />
+        </div>
+
+        <div className="relative">
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Phone Number"
+            pattern="[6-9]{1}[0-9]{9}"
+            value={formData.phone}
+            onChange={handleChange}
+            className={`w-full border ${
+              error.phone ? "border-red-500" : "border-gray-300"
             } rounded-md px-4 py-5 text-base focus:outline-none focus:ring-2 focus:ring-[#558AFF] placeholder-gray-700 placeholder:font-semibold`}
           />
         </div>

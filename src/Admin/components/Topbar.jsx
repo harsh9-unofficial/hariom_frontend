@@ -24,7 +24,7 @@ const Topbar = ({ onMenuClick }) => {
       {/* Mobile menu button */}
       <button
         type="button"
-        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
+        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#558AFF] lg:hidden"
         onClick={onMenuClick}
       >
         <span className="sr-only">Open sidebar</span>
@@ -54,7 +54,7 @@ const Topbar = ({ onMenuClick }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#558AFF]"
           >
             <span className="sr-only">Logout</span>
             <ArrowRightOnRectangleIcon className="h-6 w-6 text-black" />
@@ -63,7 +63,7 @@ const Topbar = ({ onMenuClick }) => {
           {/* Profile dropdown */}
           <div className="ml-3 relative">
             <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+              <div className="h-8 w-8 rounded-full bg-[#558AFF] flex items-center justify-center text-white font-semibold">
                 A
               </div>
               <span className="ml-2 text-sm font-medium text-gray-700 hidden md:block">
